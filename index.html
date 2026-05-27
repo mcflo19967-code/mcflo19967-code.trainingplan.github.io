@@ -2,627 +2,494 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>24‑Wochen Trainingsplan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>24-Wochen Trainingsplan</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; background: #020617; font-family: system-ui, sans-serif; }
-    button { outline: none; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #08080e; --surface: rgba(255,255,255,0.02);
+      --border: rgba(255,255,255,0.07); --text: #e2e8f0;
+      --muted: #64748b; --dim: #475569; --faint: #334155;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans','Segoe UI',sans-serif; min-height: 100vh; padding: 24px 16px 60px; }
+    .container { max-width: 520px; margin: 0 auto; }
+    .eyebrow { font-size: 10px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
+    h1 { font-size: 24px; font-weight: 700; color: #f1f5f9; line-height: 1.2; }
+    .subtitle { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .progress-wrap { margin: 20px 0; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 7px; }
+    .progress-label { font-size: 11px; color: var(--muted); }
+    .progress-value { font-size: 11px; color: #f1f5f9; font-weight: 700; }
+    .progress-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg,#4ade80,#60a5fa,#f87171,#fbbf24); border-radius: 99px; transition: width 0.4s ease; width: 0%; }
+    .phase-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+    .phase-pill { display: flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px; font-size: 10px; border: 1px solid transparent; }
+    .phase-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .week-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 5px; margin-bottom: 20px; }
+    .week-btn { padding: 7px 2px; border-radius: 7px; border: 1.5px solid var(--border); background: var(--surface); color: var(--dim); font-size: 11px; font-family: 'DM Mono',monospace; cursor: pointer; transition: all 0.15s; position: relative; text-align: center; font-weight: 400; }
+    .week-btn .weigh-dot { position: absolute; top: -2px; right: -2px; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; }
+    .week-card { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; border: 1px solid transparent; }
+    .week-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .week-phase-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+    .week-title { font-weight: 700; font-size: 15px; color: #f1f5f9; }
+    .week-focus { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .week-stats { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .week-stat { font-size: 11px; }
+    .check-btn { padding: 6px 13px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: transparent; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-family: 'DM Sans',sans-serif; }
+    .days-list { display: flex; flex-direction: column; gap: 7px; }
+    .day-row { display: flex; gap: 10px; align-items: flex-start; padding: 11px 13px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; position: relative; }
+    .day-row:hover { filter: brightness(1.15); }
+    .day-row.done { opacity: 0.45; }
+    .day-row.done .day-strecke { text-decoration: line-through; }
+    .day-check { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0; transition: opacity 0.15s; }
+    .day-row.done .day-check { opacity: 1; }
+    .day-label { min-width: 28px; font-weight: 700; font-size: 12px; padding-top: 1px; }
+    .day-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+    .day-strecke { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
+    .day-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
+    .nav-btn { flex: 1; padding: 11px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans',sans-serif; }
+    .nav-btn:disabled { color: var(--faint); cursor: default; }
+    .nav-btn.next { font-weight: 600; }
+    .footer-card { margin-top: 20px; padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+    .footer-eyebrow { font-size: 10px; color: var(--faint); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .footer-items { font-size: 12px; color: var(--dim); line-height: 1.9; }
+    .lauf-bg  { background: rgba(74,222,128,0.10); border-color: rgba(74,222,128,0.30); }
+    .gehen-bg { background: rgba(148,163,184,0.07); border-color: rgba(148,163,184,0.18); }
+    .pause-bg { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
+    .dot-lauf  { background: #4ade80; }
+    .dot-gehen { background: #94a3b8; }
+    .dot-pause { background: #475569; }
+    .reset-btn { font-size: 10px; color: var(--faint); background: none; border: none; cursor: pointer; font-family: 'DM Sans',sans-serif; padding: 4px 0; text-decoration: underline; margin-top: 10px; display: block; }
+    .reset-btn:hover { color: #f87171; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+<div class="container">
+  <div style="margin-bottom:20px">
+    <div class="eyebrow">24-Wochen Plan</div>
+    <h1>Von 105 kg zum Ziel</h1>
+    <p class="subtitle">4,5 km → 7,2 km → 9,1 km komplett &nbsp;·&nbsp; ~85–90 kg Zielgewicht</p>
+  </div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span class="progress-label">Gesamtfortschritt</span>
+      <span class="progress-value" id="progressText">0/24 Wochen · 0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
 
-    const phaseColors = {
-      Fundament: "#4ade80",
-      Aufbau: "#60a5fa",
-      Ausdauer: "#f59e0b",
-      Konsolidierung: "#a78bfa",
-      Zielgerade: "#f87171",
-      Endspurt: "#fb923c",
-      "Ziel erreicht": "#fbbf24"
+  <div class="phase-legend" id="phaseLegend"></div>
+  <div class="week-grid" id="weekGrid"></div>
+
+  <div class="week-card" id="weekCard">
+    <div class="week-card-top">
+      <div>
+        <div class="week-phase-label" id="cardPhase"></div>
+        <div class="week-title" id="cardTitle"></div>
+        <div class="week-focus" id="cardFocus"></div>
+      </div>
+      <button class="check-btn" id="checkBtn" onclick="toggleWeek()">Abhaken</button>
+    </div>
+    <div class="week-stats" id="cardStats"></div>
+  </div>
+
+  <div class="days-list" id="daysList"></div>
+
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Vorherige</button>
+    <button class="nav-btn next" id="btnNext" onclick="navigate(1)">Nächste →</button>
+  </div>
+
+  <div class="footer-card">
+    <div class="footer-eyebrow">Täglich</div>
+    <div class="footer-items">
+      🥚 2 Eier + Banane zum Frühstück<br>
+      🥣 Protein Overnight Oats zum Mittag<br>
+      💧 Nur Wasser trinken<br>
+      ⚖️ Jeden Mittwoch nüchtern wiegen
+    </div>
+    <button class="reset-btn" onclick="resetAll()">Alle Fortschritte zurücksetzen</button>
+  </div>
+</div>
+
+<script>
+const phaseColors = {
+  "Fundament":"#4ade80","Aufbau":"#60a5fa","Ausdauer":"#f59e0b",
+  "Konsolidierung":"#a78bfa","Zielgerade":"#f87171","Endspurt":"#fb923c","Ziel erreicht":"#fbbf24"
+};
+const phases = Object.keys(phaseColors);
+const weighInWeeks = [2,4,6,8,10,12,14,16,18,20,22,24];
+
+const allWeeks = [
+  {week:1,phase:"Fundament",focus:"Ankommen — Intervalle 2:1",lauftage:3,ruhetage:2,gehtage:2,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"1 min Warm-up gehen, dann 2 min laufen / 1 min gehen × 14"},
+    {day:"Di",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Gleiche Intervalle wie Mo"},
+    {day:"Do",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"3. Lauf — Pace egal, ankommen zählt"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Beine hochlegen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Optional: lockerer Spaziergang"}
+  ]},
+  {week:2,phase:"Fundament",focus:"Intervalle verlängern — 3:1",lauftage:3,ruhetage:2,gehtage:2,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"3 min laufen / 1 min gehen × 11"},
+    {day:"Di",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Gleiche Intervalle"},
+    {day:"Do",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"Letzte 500m komplett durchlaufen versuchen"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Knie checken"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen (Mittwoch-Wert vergleichen)"}
+  ]},
+  {week:3,phase:"Fundament",focus:"4 Lauftage — Intervalle 5:1",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"5 min laufen / 1 min gehen × 8"},
+    {day:"Di",type:"lauf",strecke:"Kleine (4,5 km)",note:"Gleiche Intervalle"},
+    {day:"Mi",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"3 km am Stück versuchen"},
+    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"Ruhige Pace, Atmung kontrollieren"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:4,phase:"Fundament",focus:"Erste Strecke komplett — Test auf Mittlere",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"🎯 Ziel: komplett durchlaufen!"},
+    {day:"Di",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett durchlaufen"},
+    {day:"Do",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
+    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"🎯 Erster Test mittlere Strecke — Laufen/Gehen erlaubt!"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"4 Wochen geschafft — stolz sein!"}
+  ]},
+  {week:5,phase:"Aufbau",focus:"Mittlere Strecke festigen — 2:1 Intervalle",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett durchlaufen — Pflicht ab jetzt"},
+    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"2 min laufen / 1 min gehen"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, etwas schneller als letzte Woche"},
+    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Gleiche Intervalle wie Di"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:6,phase:"Aufbau",focus:"Mittlere Strecke — Intervalle 4:1",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, Pace etwas steigern"},
+    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"4 min laufen / 1 min gehen"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Letzte 1 km komplett durchlaufen"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:7,phase:"Aufbau",focus:"Mittlere Strecke — 5 km am Stück",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, flüssig laufen"},
+    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"5 km am Stück, Rest Intervalle"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Gleiche Vorgabe wie Di"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:8,phase:"Aufbau",focus:"Mittlere Strecke komplett — Test Große Strecke",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, lockere Pace"},
+    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"🎯 Komplett durchlaufen!"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"🎯 Erster Test große Strecke — Intervalle erlaubt!"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 2 Monate geschafft!"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:9,phase:"Ausdauer",focus:"Große Strecke aufbauen — 3:1 Intervalle",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett — Pflicht ab jetzt"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"3 min laufen / 1 min gehen"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Gleiche Intervalle"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:10,phase:"Ausdauer",focus:"Große Strecke — 5:1 Intervalle",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"5 min laufen / 1 min gehen"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, etwas schneller"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"6 km am Stück versuchen"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:11,phase:"Ausdauer",focus:"Große Strecke — 7 km am Stück",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"7 km am Stück, Rest gehen"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Gleiche Vorgabe wie Di"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:12,phase:"Ausdauer",focus:"Große Strecke komplett — erster Durchlauf!",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Lockere Pace — Energie sparen"},
+    {day:"Di",type:"gehen",strecke:"45 min",note:"Aktive Erholung — Beine schonen"},
+    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, kein Stress"},
+    {day:"Do",type:"gehen",strecke:"30 min",note:"Leichte Erholung"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"🏆 9,1 km komplett durchlaufen!"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 3 Monate!"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Feiern. Wirklich."}
+  ]},
+  {week:13,phase:"Konsolidierung",focus:"Alle 3 Strecken beherrschen",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, flottes Tempo"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett durchlaufen"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett — Pace etwas steigern"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:14,phase:"Konsolidierung",focus:"Pace verbessern — Kleine Strecke schneller",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Ziel: unter 28 min"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett, lockere Pace"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:15,phase:"Konsolidierung",focus:"Woche der großen Strecken",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"3× große Strecke diese Woche 💪"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:16,phase:"Konsolidierung",focus:"Erholungswoche — Volumen reduzieren",lauftage:3,ruhetage:3,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, kein Druck"},
+    {day:"Di",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, lockere Pace"},
+    {day:"Do",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 4 Monate!"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:17,phase:"Zielgerade",focus:"Pace steigern — alle Strecken flotter",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Ziel: unter 25 min"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett, bewusst auf Tempo achten"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Ziel: unter 45 min"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:18,phase:"Zielgerade",focus:"Konstanz — 4× große Strecke",lauftage:5,ruhetage:2,gehtage:0,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Mi",type:"pause",strecke:"Ruhetag",note:"Aktive Erholung oder Ruhe"},
+    {day:"Do",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Sa",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker auslaufen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"}
+  ]},
+  {week:19,phase:"Zielgerade",focus:"Große Strecke unter 60 min",lauftage:4,ruhetage:2,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, flott"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"🎯 Ziel: unter 60 min"},
+    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett, Pace halten"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:20,phase:"Zielgerade",focus:"Erholungswoche vor Endspurt",lauftage:3,ruhetage:3,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker"},
+    {day:"Di",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
+    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, ruhige Pace"},
+    {day:"Do",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 5 Monate!"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:21,phase:"Endspurt",focus:"Peak-Woche — maximales Volumen",lauftage:5,ruhetage:2,gehtage:0,days:[
+    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
+    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Mi",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"Do",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
+    {day:"Sa",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Locker auslaufen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:22,phase:"Endspurt",focus:"Tapering — Körper frisch halten",lauftage:3,ruhetage:3,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, kein Stress"},
+    {day:"Di",type:"gehen",strecke:"30 min",note:"Leichte Bewegung"},
+    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, ruhige Pace"},
+    {day:"Do",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett — letzter Lauf vor Finalwoche"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  ]},
+  {week:23,phase:"Endspurt",focus:"Letzte Vorbereitung — Energie tanken",lauftage:3,ruhetage:3,gehtage:1,days:[
+    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, Beine frisch halten"},
+    {day:"Di",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, entspannt"},
+    {day:"Do",type:"gehen",strecke:"30 min",note:"Leichte Bewegung"},
+    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"Letzter Lauf vor dem großen Tag"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Früh ins Bett. Gut essen."},
+    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe und mentale Vorbereitung"}
+  ]},
+  {week:24,phase:"Ziel erreicht",focus:"🏆 Finaler Run — Gewichtsziel erreicht",lauftage:2,ruhetage:4,gehtage:1,days:[
+    {day:"Mo",type:"pause",strecke:"Ruhetag",note:"Ausruhen, viel trinken, gut essen"},
+    {day:"Di",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker einlaufen — kein Stress"},
+    {day:"Mi",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"Do",type:"gehen",strecke:"30 min",note:"Letzte lockere Bewegung"},
+    {day:"Fr",type:"pause",strecke:"Ruhetag",note:"Energie tanken"},
+    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
+    {day:"So",type:"lauf",strecke:"Große (9,1 km)",note:"🏆 FINALER RUN — alles geben! Du hast 24 Wochen dafür trainiert."}
+  ]}
+];
+
+// ── State ──────────────────────────────────────────────
+let activeWeek = 0;
+
+function loadState() {
+  try {
+    return {
+      completedWeeks: JSON.parse(localStorage.getItem('tp_weeks') || '[]'),
+      completedDays:  JSON.parse(localStorage.getItem('tp_days')  || '{}')
     };
+  } catch(e) { return { completedWeeks: [], completedDays: {} }; }
+}
+function saveState() {
+  localStorage.setItem('tp_weeks', JSON.stringify(state.completedWeeks));
+  localStorage.setItem('tp_days',  JSON.stringify(state.completedDays));
+}
+let state = loadState();
 
-    const typeConfig = {
-      lauf:  { bg: "rgba(74,222,128,0.10)",  border: "rgba(74,222,128,0.35)",  dot: "#4ade80" },
-      gehen: { bg: "rgba(148,163,184,0.07)", border: "rgba(148,163,184,0.18)", dot: "#94a3b8" },
-      pause: { bg: "rgba(255,255,255,0.02)", border: "rgba(255,255,255,0.05)", dot: "#475569" }
-    };
+// day key: "w{weekIdx}_d{dayIdx}"
+function dayKey(w, d) { return `w${w}_d${d}`; }
 
-    const loadCompletedWeeks = () =>
-      JSON.parse(localStorage.getItem("completedWeeks") || "[]");
+function toggleWeek() {
+  const i = state.completedWeeks.indexOf(activeWeek);
+  if (i === -1) state.completedWeeks.push(activeWeek);
+  else state.completedWeeks.splice(i, 1);
+  saveState(); render();
+}
+function toggleDay(weekIdx, dayIdx) {
+  const k = dayKey(weekIdx, dayIdx);
+  if (state.completedDays[k]) delete state.completedDays[k];
+  else state.completedDays[k] = true;
+  saveState(); buildDays();
+  // auto-check week if all days done
+  const w = allWeeks[weekIdx];
+  const allDone = w.days.every((_,i) => state.completedDays[dayKey(weekIdx,i)]);
+  const wDone = state.completedWeeks.includes(weekIdx);
+  if (allDone && !wDone) { state.completedWeeks.push(weekIdx); saveState(); buildWeekGrid(); buildWeekCard(); updateProgress(); }
+  else if (!allDone && wDone) { state.completedWeeks.splice(state.completedWeeks.indexOf(weekIdx),1); saveState(); buildWeekGrid(); buildWeekCard(); updateProgress(); }
+}
+function resetAll() {
+  if (!confirm('Alle Fortschritte zurücksetzen?')) return;
+  state = { completedWeeks: [], completedDays: {} };
+  saveState(); render();
+}
 
-    const loadDayStatus = (weekNumber) =>
-      JSON.parse(localStorage.getItem("dayStatus_W" + weekNumber) || '["","","","","","",""]');
+// ── Helpers ────────────────────────────────────────────
+function hex2rgba(hex, a) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
 
-    const saveDayStatus = (weekNumber, data) =>
-      localStorage.setItem("dayStatus_W" + weekNumber, JSON.stringify(data));
+// ── Render ─────────────────────────────────────────────
+function buildPhaseLegend() {
+  document.getElementById('phaseLegend').innerHTML = phases.map(p => {
+    const c = phaseColors[p];
+    return `<div class="phase-pill" style="background:${hex2rgba(c,.07)};border-color:${hex2rgba(c,.25)}">
+      <div class="phase-dot" style="background:${c}"></div>
+      <span style="color:${c}">${p}</span></div>`;
+  }).join('');
+}
 
-    const allWeeks = [
-      {
-        week: 1,
-        phase: "Fundament",
-        focus: "Ankommen – Intervalle 2:1",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "Locker einsteigen" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "Erholung" },
-          { day: "Mi", type: "lauf", strecke: "4,5 km", note: "Ruhig bleiben" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 2,
-        phase: "Fundament",
-        focus: "Rhythmus finden",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 3,
-        phase: "Fundament",
-        focus: "Stabil bleiben",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 4,
-        phase: "Fundament",
-        focus: "4,5 km festigen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 5,
-        phase: "Aufbau",
-        focus: "7,2 km einführen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 6,
-        phase: "Aufbau",
-        focus: "7,2 km stabil",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 7,
-        phase: "Aufbau",
-        focus: "7,2 km festigen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 8,
-        phase: "Aufbau",
-        focus: "7,2 km sicher",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 9,
-        phase: "Ausdauer",
-        focus: "9,1 km einführen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 10,
-        phase: "Ausdauer",
-        focus: "9,1 km stabil",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 11,
-        phase: "Ausdauer",
-        focus: "9,1 km festigen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 12,
-        phase: "Ausdauer",
-        focus: "9,1 km sicher",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 13,
-        phase: "Konsolidierung",
-        focus: "Alle Strecken mischen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 14,
-        phase: "Konsolidierung",
-        focus: "Tempo leicht anziehen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 15,
-        phase: "Konsolidierung",
-        focus: "Stabil bleiben",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 16,
-        phase: "Konsolidierung",
-        focus: "Locker durchziehen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 17,
-        phase: "Zielgerade",
-        focus: "Form halten",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 18,
-        phase: "Zielgerade",
-        focus: "Locker bleiben",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 19,
-        phase: "Zielgerade",
-        focus: "Konstanz",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 20,
-        phase: "Zielgerade",
-        focus: "Ruhig bleiben",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 21,
-        phase: "Endspurt",
-        focus: "Letzte Wochen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 22,
-        phase: "Endspurt",
-        focus: "Locker halten",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 23,
-        phase: "Endspurt",
-        focus: "Vorbereitung Finale",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      },
-      {
-        week: 24,
-        phase: "Ziel erreicht",
-        focus: "9,1 km sicher laufen",
-        days: [
-          { day: "Mo", type: "lauf", strecke: "4,5 km", note: "" },
-          { day: "Di", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Mi", type: "lauf", strecke: "7,2 km", note: "" },
-          { day: "Do", type: "gehen", strecke: "30–45 min", note: "" },
-          { day: "Fr", type: "lauf", strecke: "9,1 km", note: "Genießen" },
-          { day: "Sa", type: "pause", strecke: "Ruhetag", note: "" },
-          { day: "So", type: "pause", strecke: "Ruhetag", note: "" }
-        ]
-      }
-    ];
-    function Trainingsplan() {
-      const [activeWeek, setActiveWeek] = useState(0);
-      const [completedWeeks, setCompletedWeeks] = useState(loadCompletedWeeks());
-      const [dayStatus, setDayStatus] = useState(loadDayStatus(allWeeks[0].week));
+function buildWeekGrid() {
+  document.getElementById('weekGrid').innerHTML = allWeeks.map((w, i) => {
+    const isActive = i === activeWeek;
+    const isDone   = state.completedWeeks.includes(i);
+    const c        = phaseColors[w.phase];
+    const isWeigh  = weighInWeeks.includes(w.week);
+    const border   = isActive ? c : isDone ? hex2rgba(c,.4) : 'rgba(255,255,255,0.07)';
+    const bg       = isActive ? hex2rgba(c,.12) : isDone ? hex2rgba(c,.06) : 'rgba(255,255,255,0.02)';
+    const color    = isActive ? c : isDone ? hex2rgba(c,.7) : '#475569';
+    const fw       = isActive ? 700 : 400;
+    const label    = isDone ? '✓' : `W${w.week}`;
+    const dot      = (isWeigh && !isDone) ? `<div class="weigh-dot"></div>` : '';
+    return `<button class="week-btn" onclick="setWeek(${i})"
+      style="border-color:${border};background:${bg};color:${color};font-weight:${fw}">${label}${dot}</button>`;
+  }).join('');
+}
 
-      useEffect(() => {
-        setDayStatus(loadDayStatus(allWeeks[activeWeek].week));
-      }, [activeWeek]);
+function buildWeekCard() {
+  const w    = allWeeks[activeWeek];
+  const c    = phaseColors[w.phase];
+  const isDone = state.completedWeeks.includes(activeWeek);
+  const isWeigh = weighInWeeks.includes(w.week);
+  document.getElementById('weekCard').style.cssText = `background:${hex2rgba(c,.07)};border-color:${hex2rgba(c,.2)}`;
+  document.getElementById('cardPhase').textContent  = w.phase;
+  document.getElementById('cardPhase').style.color  = c;
+  document.getElementById('cardTitle').textContent  = `Woche ${w.week}`;
+  document.getElementById('cardFocus').textContent  = w.focus;
+  const btn = document.getElementById('checkBtn');
+  btn.textContent        = isDone ? '✓ Erledigt' : 'Abhaken';
+  btn.style.borderColor  = isDone ? c : 'rgba(255,255,255,0.12)';
+  btn.style.background   = isDone ? hex2rgba(c,.15) : 'transparent';
+  btn.style.color        = isDone ? c : '#64748b';
+  document.getElementById('cardStats').innerHTML =
+    `<span class="week-stat" style="color:#4ade80">🏃 ${w.lauftage}× Laufen</span>
+     <span class="week-stat" style="color:#94a3b8">🚶 ${w.gehtage}× Gehen</span>
+     <span class="week-stat" style="color:#475569">😴 ${w.ruhetage}× Pause</span>
+     ${isWeigh ? '<span class="week-stat" style="color:#fbbf24">⚖️ Wiegetag</span>' : ''}`;
+}
 
-      const toggleComplete = (weekIdx) => {
-        setCompletedWeeks(prev => {
-          const updated = prev.includes(weekIdx)
-            ? prev.filter(w => w !== weekIdx)
-            : [...prev, weekIdx];
-          localStorage.setItem("completedWeeks", JSON.stringify(updated));
-          return updated;
-        });
-      };
+function buildDays() {
+  const w = allWeeks[activeWeek];
+  const c = phaseColors[w.phase];
+  const labelColor = { lauf: c, gehen: '#94a3b8', pause: '#334155' };
+  document.getElementById('daysList').innerHTML = w.days.map((d, i) => {
+    const k     = dayKey(activeWeek, i);
+    const done  = !!state.completedDays[k];
+    const bgCls = d.type + '-bg';
+    return `<div class="day-row ${bgCls}${done?' done':''}" onclick="toggleDay(${activeWeek},${i})">
+      <div class="day-label" style="color:${labelColor[d.type]}">${d.day}</div>
+      <div class="day-dot dot-${d.type}"></div>
+      <div style="flex:1;padding-right:20px">
+        <div class="day-strecke">${d.strecke}</div>
+        <div class="day-note">${d.note}</div>
+      </div>
+      <div class="day-check" style="color:${c}">✓</div>
+    </div>`;
+  }).join('');
+}
 
-      const toggleDay = (index) => {
-        setDayStatus(prev => {
-          const updated = [...prev];
-          updated[index] =
-            updated[index] === "" ? "✔️" :
-            updated[index] === "✔️" ? "❌" : "";
-          saveDayStatus(allWeeks[activeWeek].week, updated);
-          return updated;
-        });
-      };
+function buildNav() {
+  const c    = phaseColors[allWeeks[activeWeek].phase];
+  const prev = document.getElementById('btnPrev');
+  const next = document.getElementById('btnNext');
+  prev.disabled    = activeWeek === 0;
+  prev.style.color = activeWeek === 0 ? '#2d3748' : '#94a3b8';
+  next.disabled    = activeWeek === 23;
+  next.style.borderColor = activeWeek < 23 ? hex2rgba(c,.35) : 'rgba(255,255,255,0.07)';
+  next.style.background  = activeWeek < 23 ? hex2rgba(c,.10) : 'rgba(255,255,255,0.02)';
+  next.style.color       = activeWeek < 23 ? c : '#475569';
+}
 
-      const week = allWeeks[activeWeek];
-      const progress = Math.round((completedWeeks.length / allWeeks.length) * 100);
+function updateProgress() {
+  const n   = state.completedWeeks.length;
+  const pct = Math.round(n / 24 * 100);
+  document.getElementById('progressText').textContent = `${n}/24 Wochen · ${pct}%`;
+  document.getElementById('progressBar').style.width  = pct + '%';
+}
 
-      return (
-        <div style={{
-          minHeight: "100vh",
-          background: "#020617",
-          color: "#e2e8f0",
-          padding: "20px 14px 40px",
-          maxWidth: 500,
-          margin: "0 auto"
-        }}>
-          <h1 style={{ fontSize: 22, marginBottom: 10 }}>24‑Wochen Trainingsplan</h1>
+function render() {
+  buildWeekGrid(); buildWeekCard(); buildDays(); buildNav(); updateProgress();
+}
 
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>
-              Fortschritt: {completedWeeks.length}/{allWeeks.length} · {progress}%
-            </div>
-            <div style={{ height: 6, background: "#1e293b", borderRadius: 99 }}>
-              <div style={{
-                height: "100%",
-                width: `${progress}%`,
-                background: "linear-gradient(90deg,#4ade80,#60a5fa,#f87171,#fbbf24)",
-                borderRadius: 99
-              }} />
-            </div>
-          </div>
+function setWeek(i)    { activeWeek = i; render(); }
+function navigate(dir) { const n = activeWeek + dir; if (n >= 0 && n < 24) { activeWeek = n; render(); } }
 
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(6,1fr)",
-            gap: 5,
-            marginBottom: 20
-          }}>
-            {allWeeks.map((w, i) => {
-              const active = i === activeWeek;
-              const done = completedWeeks.includes(i);
-              const color = phaseColors[w.phase];
-              return (
-                <button
-                  key={i}
-                  onClick={() => setActiveWeek(i)}
-                  style={{
-                    padding: "6px 2px",
-                    borderRadius: 7,
-                    border: `1.5px solid ${active ? color : done ? color + "50" : "#334155"}`,
-                    background: active ? color + "18" : done ? color + "08" : "#0f172a",
-                    color: active ? color : done ? color + "90" : "#94a3b8",
-                    fontSize: 11,
-                    fontWeight: active ? 700 : 400,
-                    cursor: "pointer"
-                  }}
-                >
-                  {done ? "✓" : `W${w.week}`}
-                </button>
-              );
-            })}
-          </div>
-
-          <div style={{
-            padding: 14,
-            borderRadius: 12,
-            background: phaseColors[week.phase] + "10",
-            border: `1px solid ${phaseColors[week.phase]}28`,
-            marginBottom: 14
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div>
-                <div style={{
-                  fontSize: 10,
-                  color: phaseColors[week.phase],
-                  letterSpacing: 2,
-                  textTransform: "uppercase"
-                }}>
-                  {week.phase}
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>Woche {week.week}</div>
-                <div style={{ fontSize: 12, color: "#64748b" }}>{week.focus}</div>
-              </div>
-
-              <button
-                onClick={() => toggleComplete(activeWeek)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: 8,
-                  border: `1px solid ${completedWeeks.includes(activeWeek) ? phaseColors[week.phase] : "#334155"}`,
-                  background: completedWeeks.includes(activeWeek) ? phaseColors[week.phase] + "20" : "transparent",
-                  color: completedWeeks.includes(activeWeek) ? phaseColors[week.phase] : "#94a3b8",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  cursor: "pointer"
-                }}
-              >
-                {completedWeeks.includes(activeWeek) ? "✓ Erledigt" : "Abhaken"}
-              </button>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-            {week.days.map((d, i) => {
-              const cfg = typeConfig[d.type];
-              const status = dayStatus[i] || "";
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    padding: "11px 13px",
-                    borderRadius: 10,
-                    background: cfg.bg,
-                    border: `1px solid ${cfg.border}`
-                  }}
-                >
-                  <div
-                    style={{
-                      minWidth: 28,
-                      fontWeight: 700,
-                      fontSize: 12,
-                      color:
-                        d.type === "lauf"
-                          ? phaseColors[week.phase]
-                          : d.type === "gehen"
-                          ? "#94a3b8"
-                          : "#64748b"
-                    }}
-                  >
-                    {d.day}
-                  </div>
-
-                  <div
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: cfg.dot,
-                      marginTop: 4
-                    }}
-                  />
-
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{d.strecke}</div>
-                    <div style={{ fontSize: 11, color: "#64748b" }}>{d.note}</div>
-                  </div>
-
-                  <button
-                    onClick={() => toggleDay(i)}
-                    style={{
-                      fontSize: 16,
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid #334155",
-                      background: "#0f172a",
-                      color:
-                        status === "✔️"
-                          ? "#4ade80"
-                          : status === "❌"
-                          ? "#f87171"
-                          : "#64748b",
-                      cursor: "pointer"
-                    }}
-                  >
-                    {status || "·"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-
-          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            <button
-              onClick={() => setActiveWeek(Math.max(0, activeWeek - 1))}
-              disabled={activeWeek === 0}
-              style={{
-                flex: 1,
-                padding: 10,
-                borderRadius: 9,
-                border: "1px solid #334155",
-                background: "#0f172a",
-                color: activeWeek === 0 ? "#1e293b" : "#94a3b8",
-                cursor: activeWeek === 0 ? "default" : "pointer"
-              }}
-            >
-              ← Vorherige
-            </button>
-
-            <button
-              onClick={() =>
-                setActiveWeek(Math.min(allWeeks.length - 1, activeWeek + 1))
-              }
-              disabled={activeWeek === allWeeks.length - 1}
-              style={{
-                flex: 1,
-                padding: 10,
-                borderRadius: 9,
-                border: `1px solid ${phaseColors[week.phase]}40`,
-                background: phaseColors[week.phase] + "12",
-                color: phaseColors[week.phase],
-                fontWeight: 600,
-                cursor:
-                  activeWeek === allWeeks.length - 1 ? "default" : "pointer"
-              }}
-            >
-              Nächste →
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<Trainingsplan />);
-  </script>
+// Init
+buildPhaseLegend();
+render();
+</script>
 </body>
 </html>
