@@ -1,495 +1,932 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>24-Wochen Trainingsplan</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #08080e; --surface: rgba(255,255,255,0.02);
-      --border: rgba(255,255,255,0.07); --text: #e2e8f0;
-      --muted: #64748b; --dim: #475569; --faint: #334155;
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans','Segoe UI',sans-serif; min-height: 100vh; padding: 24px 16px 60px; }
-    .container { max-width: 520px; margin: 0 auto; }
-    .eyebrow { font-size: 10px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
-    h1 { font-size: 24px; font-weight: 700; color: #f1f5f9; line-height: 1.2; }
-    .subtitle { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    .progress-wrap { margin: 20px 0; }
-    .progress-header { display: flex; justify-content: space-between; margin-bottom: 7px; }
-    .progress-label { font-size: 11px; color: var(--muted); }
-    .progress-value { font-size: 11px; color: #f1f5f9; font-weight: 700; }
-    .progress-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-    .progress-bar { height: 100%; background: linear-gradient(90deg,#4ade80,#60a5fa,#f87171,#fbbf24); border-radius: 99px; transition: width 0.4s ease; width: 0%; }
-    .phase-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
-    .phase-pill { display: flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px; font-size: 10px; border: 1px solid transparent; }
-    .phase-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-    .week-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 5px; margin-bottom: 20px; }
-    .week-btn { padding: 7px 2px; border-radius: 7px; border: 1.5px solid var(--border); background: var(--surface); color: var(--dim); font-size: 11px; font-family: 'DM Mono',monospace; cursor: pointer; transition: all 0.15s; position: relative; text-align: center; font-weight: 400; }
-    .week-btn .weigh-dot { position: absolute; top: -2px; right: -2px; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; }
-    .week-card { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; border: 1px solid transparent; }
-    .week-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .week-phase-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
-    .week-title { font-weight: 700; font-size: 15px; color: #f1f5f9; }
-    .week-focus { font-size: 12px; color: var(--muted); margin-top: 3px; }
-    .week-stats { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
-    .week-stat { font-size: 11px; }
-    .check-btn { padding: 6px 13px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: transparent; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-family: 'DM Sans',sans-serif; }
-    .days-list { display: flex; flex-direction: column; gap: 7px; }
-    .day-row { display: flex; gap: 10px; align-items: flex-start; padding: 11px 13px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; position: relative; }
-    .day-row:hover { filter: brightness(1.15); }
-    .day-row.done { opacity: 0.45; }
-    .day-row.done .day-strecke { text-decoration: line-through; }
-    .day-check { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0; transition: opacity 0.15s; }
-    .day-row.done .day-check { opacity: 1; }
-    .day-label { min-width: 28px; font-weight: 700; font-size: 12px; padding-top: 1px; }
-    .day-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-    .day-strecke { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
-    .day-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
-    .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
-    .nav-btn { flex: 1; padding: 11px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans',sans-serif; }
-    .nav-btn:disabled { color: var(--faint); cursor: default; }
-    .nav-btn.next { font-weight: 600; }
-    .footer-card { margin-top: 20px; padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
-    .footer-eyebrow { font-size: 10px; color: var(--faint); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-    .footer-items { font-size: 12px; color: var(--dim); line-height: 1.9; }
-    .lauf-bg  { background: rgba(74,222,128,0.10); border-color: rgba(74,222,128,0.30); }
-    .gehen-bg { background: rgba(148,163,184,0.07); border-color: rgba(148,163,184,0.18); }
-    .pause-bg { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
-    .dot-lauf  { background: #4ade80; }
-    .dot-gehen { background: #94a3b8; }
-    .dot-pause { background: #475569; }
-    .reset-btn { font-size: 10px; color: var(--faint); background: none; border: none; cursor: pointer; font-family: 'DM Sans',sans-serif; padding: 4px 0; text-decoration: underline; margin-top: 10px; display: block; }
-    .reset-btn:hover { color: #f87171; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trainingsplan — Flo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#08080e;--surface:rgba(255,255,255,0.02);--border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b;--dim:#475569;--faint:#334155}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans','Segoe UI',sans-serif;min-height:100vh;padding:0 0 80px}
+.container{max-width:520px;margin:0 auto;padding:0 16px}
+.nav{position:sticky;top:0;z-index:100;background:rgba(8,8,14,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 16px}
+.nav-inner{max-width:520px;margin:0 auto;display:flex;gap:4px;padding:10px 0}
+.nav-btn{flex:1;padding:8px 4px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;text-align:center}
+.nav-btn.active{background:rgba(255,255,255,0.05);border-color:var(--border);color:#f1f5f9}
+.page{display:none;padding-top:24px}
+.page.active{display:block}
+.eyebrow{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.page-title{font-size:24px;font-weight:700;color:#f1f5f9;line-height:1.2}
+.subtitle{font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:20px}
+.progress-wrap{margin:20px 0}
+.progress-header{display:flex;justify-content:space-between;margin-bottom:7px}
+.progress-label{font-size:11px;color:var(--muted)}
+.progress-value{font-size:11px;color:#f1f5f9;font-weight:700}
+.progress-track{height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4ade80,#60a5fa,#f87171,#fbbf24);border-radius:99px;transition:width 0.4s ease;width:0%}
+.phase-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.phase-pill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:10px;border:1px solid transparent}
+.phase-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.week-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:20px}
+.week-btn{padding:7px 2px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--dim);font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;transition:all 0.15s;position:relative;text-align:center;font-weight:400}
+.weigh-dot{position:absolute;top:-2px;right:-2px;width:5px;height:5px;border-radius:50%;background:#fbbf24}
+.week-card{border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid transparent}
+.week-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.week-phase-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.week-title{font-weight:700;font-size:15px;color:#f1f5f9}
+.week-focus{font-size:12px;color:var(--muted);margin-top:3px}
+.week-stats{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.week-stat{font-size:11px}
+.check-btn{padding:6px 13px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;font-family:'DM Sans',sans-serif}
+.days-list{display:flex;flex-direction:column;gap:7px}
+.day-row{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:10px;border:1px solid transparent;cursor:pointer;transition:all 0.15s;position:relative}
+.day-row:hover{filter:brightness(1.15)}
+.day-row.done{opacity:0.45}
+.day-row.done .day-strecke{text-decoration:line-through}
+.day-check{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0;transition:opacity 0.15s}
+.day-row.done .day-check{opacity:1}
+.day-label{min-width:28px;font-weight:700;font-size:12px;padding-top:1px}
+.day-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.day-strecke{font-size:13px;font-weight:600;color:#e2e8f0;margin-bottom:2px}
+.day-note{font-size:11px;color:var(--muted);line-height:1.5}
+.nav-btns{display:flex;gap:8px;margin-top:16px}
+.nav-arrow{flex:1;padding:11px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:#94a3b8;font-size:13px;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.nav-arrow:disabled{color:var(--faint);cursor:default}
+.nav-arrow.next{font-weight:600}
+.footer-card{margin-top:20px;padding:14px 16px;border-radius:10px;background:var(--surface);border:1px solid var(--border)}
+.footer-eyebrow{font-size:10px;color:var(--faint);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.footer-items{font-size:12px;color:var(--dim);line-height:1.9}
+.reset-btn{font-size:10px;color:var(--faint);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 0;text-decoration:underline;margin-top:10px;display:block}
+.reset-btn:hover{color:#f87171}
+.lauf-bg{background:rgba(74,222,128,0.10);border-color:rgba(74,222,128,0.30)}
+.gehen-bg{background:rgba(148,163,184,0.07);border-color:rgba(148,163,184,0.18)}
+.pause-bg{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.05)}
+.fahrrad-bg{background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.25)}
+.dot-lauf{background:#4ade80}
+.dot-gehen{background:#94a3b8}
+.dot-pause{background:#475569}
+.dot-fahrrad{background:#fbbf24}
+.rain-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px solid rgba(96,165,250,0.3);background:rgba(96,165,250,0.07);color:#60a5fa;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:10px;transition:all 0.15s;width:fit-content}
+.rain-btn:hover{background:rgba(96,165,250,0.14)}
+.exercise-card{border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid rgba(168,139,250,0.2);background:rgba(168,139,250,0.06)}
+.exercise-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.exercise-name{font-weight:700;font-size:14px;color:#f1f5f9}
+.exercise-badge{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600}
+.exercise-sets{display:flex;flex-direction:column;gap:5px}
+.set-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:all 0.15s}
+.set-row:hover{filter:brightness(1.2)}
+.set-row.done{opacity:0.4}
+.set-row.done .set-label{text-decoration:line-through}
+.set-num{font-size:11px;color:var(--dim);font-family:'DM Mono',monospace;min-width:20px}
+.set-label{font-size:12px;color:#e2e8f0;flex:1}
+.set-check{font-size:12px;color:#a78bfa;opacity:0;transition:opacity 0.15s}
+.set-row.done .set-check{opacity:1}
+.weight-input-card{padding:16px;border-radius:12px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);margin-bottom:20px}
+.weight-input-row{display:flex;gap:8px;align-items:flex-end;margin-top:12px}
+.weight-input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid rgba(74,222,128,0.3);background:rgba(255,255,255,0.04);color:#f1f5f9;font-size:16px;font-family:'DM Sans',sans-serif;outline:none}
+.weight-input:focus{border-color:#4ade80}
+.weight-save-btn{padding:10px 16px;border-radius:8px;border:none;background:#4ade80;color:#08080e;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.weight-entry{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-radius:9px;background:var(--surface);border:1px solid var(--border);margin-bottom:6px}
+.weight-entry-date{font-size:11px;color:var(--muted)}
+.weight-entry-val{font-size:16px;font-weight:700;color:#f1f5f9}
+.weight-entry-diff{font-size:11px;font-weight:600}
+.weight-del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:4px}
+.weight-del:hover{color:#f87171}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px}
+.chart-title{font-size:12px;color:var(--muted);margin-bottom:12px}
+canvas{width:100%!important}
+.weight-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.weight-stat-card{padding:12px;border-radius:10px;background:var(--surface);border:1px solid var(--border);text-align:center}
+.weight-stat-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+.weight-stat-val{font-size:18px;font-weight:700}
+.weight-stat-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.goal-bar-wrap{margin-bottom:20px}
+.goal-bar-header{display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;color:var(--muted)}
+.goal-track{height:8px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.goal-fill{height:100%;background:linear-gradient(90deg,#4ade80,#60a5fa);border-radius:99px;transition:width 0.5s ease}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+</style>
 </head>
 <body>
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showPage('lauf')">🏃 Laufen</button>
+    <button class="nav-btn" onclick="showPage('indoor')">🏠 Indoor</button>
+    <button class="nav-btn" onclick="showPage('weight')">⚖️ Gewicht</button>
+  </div>
+</nav>
+ 
+<!-- LAUFEN -->
+<div id="page-lauf" class="page active">
 <div class="container">
-  <div style="margin-bottom:20px">
-    <div class="eyebrow">24-Wochen Plan</div>
-    <h1>Von 105 kg zum Ziel</h1>
-    <p class="subtitle">4,5 km → 7,2 km → 9,1 km komplett &nbsp;·&nbsp; ~85–90 kg Zielgewicht</p>
-  </div>
-
+  <div class="eyebrow">24-Wochen Plan</div>
+  <div class="page-title">Von 105 kg zum Ziel</div>
+  <p class="subtitle">4,5 km → 7,2 km → 9,1 km &nbsp;·&nbsp; Fahrrad Mi: 14,9 / 29,8 / 32 km &nbsp;·&nbsp; Ziel ~85–90 kg</p>
   <div class="progress-wrap">
-    <div class="progress-header">
-      <span class="progress-label">Gesamtfortschritt</span>
-      <span class="progress-value" id="progressText">0/24 Wochen · 0%</span>
-    </div>
-    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-header"><span class="progress-label">Gesamtfortschritt</span><span class="progress-value" id="laufPText">0/24 Wochen · 0%</span></div>
+    <div class="progress-track"><div class="progress-bar" id="laufPBar"></div></div>
   </div>
-
   <div class="phase-legend" id="phaseLegend"></div>
   <div class="week-grid" id="weekGrid"></div>
-
   <div class="week-card" id="weekCard">
     <div class="week-card-top">
-      <div>
-        <div class="week-phase-label" id="cardPhase"></div>
-        <div class="week-title" id="cardTitle"></div>
-        <div class="week-focus" id="cardFocus"></div>
-      </div>
+      <div><div class="week-phase-label" id="cardPhase"></div><div class="week-title" id="cardTitle"></div><div class="week-focus" id="cardFocus"></div></div>
       <button class="check-btn" id="checkBtn" onclick="toggleWeek()">Abhaken</button>
     </div>
     <div class="week-stats" id="cardStats"></div>
+    <button class="rain-btn" onclick="goIndoor()">🌧 Regentag → Indoor Workout</button>
   </div>
-
   <div class="days-list" id="daysList"></div>
-
   <div class="nav-btns">
-    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Vorherige</button>
-    <button class="nav-btn next" id="btnNext" onclick="navigate(1)">Nächste →</button>
+    <button class="nav-arrow" id="btnPrev" onclick="laufNav(-1)">← Vorherige</button>
+    <button class="nav-arrow next" id="btnNext" onclick="laufNav(1)">Nächste →</button>
   </div>
-
   <div class="footer-card">
     <div class="footer-eyebrow">Täglich</div>
     <div class="footer-items">
-      🥚 2 Eier + Banane zum Frühstück<br>
+      🥚 2 Eier + Banane vor dem Lauf<br>
+      🥤 Proteinshake nach dem Lauf<br>
       🥣 Protein Overnight Oats zum Mittag<br>
-      💧 Nur Wasser trinken<br>
+      ☕ 2 Tassen schwarzer Kaffee<br>
+      💧 Nur Wasser als Getränk<br>
+      🚴 Fahrrad Mi: ~600 / ~950 / ~1050 kcal je Phase<br>
       ⚖️ Jeden Mittwoch nüchtern wiegen
     </div>
-    <button class="reset-btn" onclick="resetAll()">Alle Fortschritte zurücksetzen</button>
+    <button class="reset-btn" onclick="resetLauf()">Laufplan zurücksetzen</button>
   </div>
 </div>
-
+</div>
+ 
+<!-- INDOOR -->
+<div id="page-indoor" class="page">
+<div class="container">
+  <div class="eyebrow">Indoor Plan</div>
+  <div class="page-title">Regentag Workout</div>
+  <p class="subtitle">Kein Equipment · 24 Wochen aufbauend · passend zum Laufplan</p>
+  <div class="progress-wrap">
+    <div class="progress-header"><span class="progress-label">Indoor Fortschritt</span><span class="progress-value" id="indPText">0/24 Wochen · 0%</span></div>
+    <div class="progress-track"><div class="progress-bar" id="indPBar"></div></div>
+  </div>
+  <div class="phase-legend" id="indPhaseLegend"></div>
+  <div class="week-grid" id="indWeekGrid"></div>
+  <div class="week-card" id="indWeekCard">
+    <div class="week-card-top">
+      <div><div class="week-phase-label" id="indCardPhase"></div><div class="week-title" id="indCardTitle"></div><div class="week-focus" id="indCardFocus"></div></div>
+      <button class="check-btn" id="indCheckBtn" onclick="toggleIndWeek()">Abhaken</button>
+    </div>
+    <div class="week-stats" id="indCardStats"></div>
+  </div>
+  <div id="indExercises"></div>
+  <div class="nav-btns">
+    <button class="nav-arrow" id="indBtnPrev" onclick="indNav(-1)">← Vorherige</button>
+    <button class="nav-arrow next" id="indBtnNext" onclick="indNav(1)">Nächste →</button>
+  </div>
+  <div class="footer-card" style="margin-top:20px">
+    <div class="footer-eyebrow">Hinweise</div>
+    <div class="footer-items">⏱ Pause zwischen Sätzen: 45–90 Sek<br>💧 Wasser bereitstellen<br>🧘 5 min Dehnen danach<br>🔄 Übungen anpassen wenn Knie schmerzen</div>
+    <button class="reset-btn" onclick="resetInd()">Indoor Plan zurücksetzen</button>
+  </div>
+</div>
+</div>
+ 
+<!-- GEWICHT -->
+<div id="page-weight" class="page">
+<div class="container">
+  <div class="eyebrow">Gewichtstracker</div>
+  <div class="page-title">Dein Fortschritt</div>
+  <p class="subtitle">Startgewicht 105 kg · Ziel 85–90 kg</p>
+  <div class="weight-stats" id="wStats"></div>
+  <div class="goal-bar-wrap" id="wGoalBar"></div>
+  <div class="weight-input-card">
+    <div class="eyebrow" style="margin-bottom:4px">Neuer Eintrag</div>
+    <div style="font-size:12px;color:var(--muted)">Jeden Mittwoch morgens nüchtern wiegen</div>
+    <div class="weight-input-row">
+      <input class="weight-input" type="number" id="wInput" placeholder="z.B. 104.2" step="0.1" min="40" max="250"/>
+      <button class="weight-save-btn" onclick="saveWeight()">Eintragen</button>
+    </div>
+  </div>
+  <div class="chart-wrap" id="wChartWrap" style="display:none">
+    <div class="chart-title">Gewichtsverlauf</div>
+    <canvas id="wChart" height="180"></canvas>
+  </div>
+  <div id="wEntries"></div>
+  <div class="footer-card">
+    <div class="footer-eyebrow">Zielberechnung</div>
+    <div class="footer-items">📉 0,5–1 kg pro Woche ist gesundes Tempo<br>🎯 Zielzone: 85–90 kg<br>📅 Bei 0,75 kg/Woche: ~20–26 Wochen<br>💪 Mit Sport + Protein früher erreichbar</div>
+    <button class="reset-btn" onclick="resetWeight()">Gewichtsdaten löschen</button>
+  </div>
+</div>
+</div>
+ 
 <script>
-const phaseColors = {
-  "Fundament":"#4ade80","Aufbau":"#60a5fa","Ausdauer":"#f59e0b",
-  "Konsolidierung":"#a78bfa","Zielgerade":"#f87171","Endspurt":"#fb923c","Ziel erreicht":"#fbbf24"
+// ── PHASE COLORS ──────────────────────────────────
+var PC = {
+  "Fundament":      "#4ade80",
+  "Aufbau":         "#60a5fa",
+  "Ausdauer":       "#f59e0b",
+  "Konsolidierung": "#a78bfa",
+  "Zielgerade":     "#f87171",
+  "Endspurt":       "#fb923c",
+  "Ziel erreicht":  "#fbbf24"
 };
-const phases = Object.keys(phaseColors);
-const weighInWeeks = [2,4,6,8,10,12,14,16,18,20,22,24];
+var PHASES = Object.keys(PC);
+var WEIGH_WEEKS = [2,4,6,8,10,12,14,16,18,20,22,24];
+ 
+// ── LAUF DATA ────────────────────────────────────
+var LW = [
+  {w:1,ph:"Fundament",fo:"Ankommen — Intervalle 2:1",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"2 min laufen / 1 min gehen — 14 Wiederholungen"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Aktive Erholung"},
+  {d:"Mi",t:"fahrrad",s:"45–60 min",n:"Locker, niedriger Puls"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"4,5 km",n:"Gleiche Intervalle wie Mo"}
 
-const allWeeks = [
-  {week:1,phase:"Fundament",focus:"Ankommen — Intervalle 2:1",lauftage:3,ruhetage:2,gehtage:2,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"1 min Warm-up gehen, dann 2 min laufen / 1 min gehen × 14"},
-    {day:"Di",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Gleiche Intervalle wie Mo"},
-    {day:"Do",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"3. Lauf — Pace egal, ankommen zählt"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Beine hochlegen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Optional: lockerer Spaziergang"}
   ]},
-  {week:2,phase:"Fundament",focus:"Intervalle verlängern — 3:1",lauftage:3,ruhetage:2,gehtage:2,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"3 min laufen / 1 min gehen × 11"},
-    {day:"Di",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Gleiche Intervalle"},
-    {day:"Do",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"Letzte 500m komplett durchlaufen versuchen"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Knie checken"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen (Mittwoch-Wert vergleichen)"}
+  {w:2,ph:"Fundament",fo:"Intervalle verlängern — 3:1",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"3 min laufen / 1 min gehen"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"45–60 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"4,5 km",n:"Letzte 3 Intervalle etwas länger laufen"}
+]},
+
+ {w:3,ph:"Fundament",fo:"Intervalle 5:1",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"5 min laufen / 1 min gehen"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"50–65 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"4,5 km",n:"Ruhige Pace, Atmung kontrollieren"}
+]}
+,
+{w:4,ph:"Fundament",fo:"Erste Strecke komplett",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Komplett durchlaufen — egal wie langsam"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"50–65 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Laufen/Gehen erlaubt"}
+]}
+,
+ {w:5,ph:"Aufbau",fo:"Mittlere Strecke festigen",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Komplett, locker"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"55–70 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"So gut es geht"}
   ]},
-  {week:3,phase:"Fundament",focus:"4 Lauftage — Intervalle 5:1",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"5 min laufen / 1 min gehen × 8"},
-    {day:"Di",type:"lauf",strecke:"Kleine (4,5 km)",note:"Gleiche Intervalle"},
-    {day:"Mi",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"3 km am Stück versuchen"},
-    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"Ruhige Pace, Atmung kontrollieren"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+
+ {w:6,ph:"Aufbau",fo:"Mittlere Strecke — 4:1 Intervalle",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Pace leicht steigern"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"60–75 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Letzter 1 km durchlaufen"}
+]}
+,
+ {w:7,ph:"Aufbau",fo:"5 km am Stück",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Flüssig laufen"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"60–75 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Gleiche Vorgabe wie Mo"}
+]}
+,
+ {w:8,ph:"Aufbau",fo:"Test große Strecke",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Locker"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"60–75 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"Intervalle erlaubt"}
+]}
+,
+ {w:9,ph:"Ausdauer",fo:"Große Strecke — 3:1",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Komplett"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"70–80 min",n:"Moderate Belastung"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"3:1 Intervalle"}
+]}
+,
+  {w:10,ph:"Ausdauer",fo:"5:1 Intervalle",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Komplett"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"70–80 min",n:"Locker bis moderat"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"6 km am Stück versuchen"}
+]}
+,
+  {w:11,ph:"Ausdauer",fo:"7 km am Stück",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Komplett"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"70–80 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"7 km am Stück"}
+]}
+,
+  {w:12,ph:"Ausdauer",fo:"9,1 km komplett",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Locker"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"70–80 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"Komplett durchlaufen!"}
+]}
+,
+  {w:13,ph:"Konsolidierung",fo:"Alle Strecken stabilisieren",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Flüssig laufen, ruhige Atmung"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"70–80 min",n:"Locker bis moderat"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Komplett, entspanntes Tempo"}
+]}
+,
+  {w:14,ph:"Konsolidierung",fo:"Kleine Strecke verbessern",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Etwas flotter, aber nicht übertreiben"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"70–80 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Komplett, ruhige Pace"}
+]}
+,
+  {w:15,ph:"Konsolidierung",fo:"Mittlere Strecke festigen",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Komplett, entspannt"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"75–85 min",n:"Locker bis moderat"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"4,5 km",n:"Locker auslaufen"}
+]}
+,
+ {w:16,ph:"Konsolidierung",fo:"Erholungswoche — Volumen reduzieren",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Locker, kein Druck"},
+  {d:"Di",t:"gehen",s:"20–30 min",n:"Sehr locker"},
+  {d:"Mi",t:"fahrrad",s:"60–70 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"20–30 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Ruhige Pace"}
+]}
+,
+ {w:17,ph:"Zielgerade",fo:"Kleine Strecke flüssiger laufen",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Flüssig, leichte Steigerung"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"75–85 min",n:"Moderate Belastung"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Komplett, entspannt"}
+]}
+,
+{w:18,ph:"Zielgerade",fo:"Große Strecke festigen",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Komplett"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"75–85 min",n:"Locker bis moderat"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"Komplett, ruhige Pace"}
+]}
+,
+{w:19,ph:"Zielgerade",fo:"Große Strecke stabil schneller",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Flott, aber kontrolliert"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"75–85 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"Komplett, gleichmäßige Pace"}
+]}
+,
+{w:20,ph:"Zielgerade",fo:"Erholungswoche",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Locker"},
+  {d:"Di",t:"gehen",s:"20–30 min",n:"Sehr locker"},
+  {d:"Mi",t:"fahrrad",s:"60–70 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"20–30 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Ruhige Pace"}
+]}
+,
+ {w:21,ph:"Endspurt",fo:"Peak-Woche — Volumen hoch",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"7,2 km",n:"Komplett"},
+  {d:"Di",t:"gehen",s:"30–45 min",n:"Erholung"},
+  {d:"Mi",t:"fahrrad",s:"80–90 min",n:"Moderate Belastung"},
+  {d:"Do",t:"gehen",s:"30–45 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"Komplett"}
+]}
+,
+{w:22,ph:"Endspurt",fo:"Tapering — Körper frisch halten",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Locker"},
+  {d:"Di",t:"gehen",s:"20–30 min",n:"Locker"},
+  {d:"Mi",t:"fahrrad",s:"60–70 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"20–30 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Ruhige Pace"}
+]}
+,
+{w:23,ph:"Endspurt",fo:"Letzte Vorbereitung — Energie tanken",lt:2,rt:1,gt:2,ft:0,days:[
+  {d:"Mo",t:"lauf",s:"4,5 km",n:"Locker, Beine frisch halten"},
+  {d:"Di",t:"gehen",s:"20–30 min",n:"Locker"},
+  {d:"Mi",t:"fahrrad",s:"60–70 min",n:"Locker"},
+  {d:"Do",t:"gehen",s:"20–30 min",n:"Locker"},
+  {d:"Fr",t:"lauf",s:"7,2 km",n:"Entspannt, kein Druck"}
+]}
+,
+ {w:24,ph:"Ziel erreicht",fo:"FINALER RUN",lt:1,rt:4,gt:0,ft:0,days:[
+  {d:"Mo",t:"pause",s:"Ruhetag",n:"Ausruhen, gut essen"},
+  {d:"Di",t:"lauf",s:"4,5 km",n:"Sehr locker einlaufen"},
+  {d:"Mi",t:"pause",s:"Ruhetag",n:"Beine hoch"},
+  {d:"Do",t:"pause",s:"Ruhetag",n:"Locker bewegen"},
+  {d:"Fr",t:"pause",s:"Ruhetag",n:"Energie sammeln"},
+  {d:"Sa",t:"pause",s:"Ruhetag",n:"Früh schlafen"},
+  {d:"Fr",t:"lauf",s:"9,1 km",n:"FINALER RUN — alles geben!"}
+]}
+];
+ 
+// ── INDOOR DATA ───────────────────────────────────
+var IW = [
+  {w:1,ph:"Fundament",fo:"Koerper kennenlernen",dur:"20 min",kcal:"~150",ex:[
+    {name:"Jumping Jacks",badge:"Cardio",sets:["2 x 30 Sekunden","45 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 10 Wdh — langsam und kontrolliert","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["2 x 20 Sekunden halten","45 Sek Pause"]},
+    {name:"Liegestuetz (Knie)",badge:"Kraft",sets:["2 x 8 Wdh — Knie auf dem Boden ok!","45 Sek Pause"]}
   ]},
-  {week:4,phase:"Fundament",focus:"Erste Strecke komplett — Test auf Mittlere",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"🎯 Ziel: komplett durchlaufen!"},
-    {day:"Di",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett durchlaufen"},
-    {day:"Do",type:"gehen",strecke:"30–45 min",note:"Aktive Erholung"},
-    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"🎯 Erster Test mittlere Strecke — Laufen/Gehen erlaubt!"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"4 Wochen geschafft — stolz sein!"}
+  {w:2,ph:"Fundament",fo:"Erste Steigerung",dur:"22 min",kcal:"~170",ex:[
+    {name:"Jumping Jacks",badge:"Cardio",sets:["2 x 40 Sekunden","45 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 12 Wdh","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["2 x 25 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz (Knie)",badge:"Kraft",sets:["2 x 10 Wdh","45 Sek Pause"]},
+    {name:"Wandsitzen",badge:"Kraft",sets:["2 x 20 Sekunden halten","45 Sek Pause"]}
   ]},
-  {week:5,phase:"Aufbau",focus:"Mittlere Strecke festigen — 2:1 Intervalle",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett durchlaufen — Pflicht ab jetzt"},
-    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"2 min laufen / 1 min gehen"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, etwas schneller als letzte Woche"},
-    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Gleiche Intervalle wie Di"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:3,ph:"Fundament",fo:"Cardio-Anteil erhoehen",dur:"25 min",kcal:"~200",ex:[
+    {name:"High Knees",badge:"Cardio",sets:["3 x 30 Sekunden","45 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 15 Wdh","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 25 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz (Knie)",badge:"Kraft",sets:["3 x 10 Wdh","45 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["2 x 8 pro Bein","45 Sek Pause"]}
   ]},
-  {week:6,phase:"Aufbau",focus:"Mittlere Strecke — Intervalle 4:1",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, Pace etwas steigern"},
-    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"4 min laufen / 1 min gehen"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Letzte 1 km komplett durchlaufen"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:4,ph:"Fundament",fo:"Erste echte Liegestuetz versuchen",dur:"28 min",kcal:"~220",ex:[
+    {name:"High Knees",badge:"Cardio",sets:["3 x 40 Sekunden","45 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["4 x 12 Wdh","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 30 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz (normal!)",badge:"Kraft",sets:["2 x max Wdh — so viele wie moeglich","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["3 x 10 pro Bein","45 Sek Pause"]},
+    {name:"Wandsitzen",badge:"Kraft",sets:["2 x 30 Sekunden","45 Sek Pause"]}
   ]},
-  {week:7,phase:"Aufbau",focus:"Mittlere Strecke — 5 km am Stück",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, flüssig laufen"},
-    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"5 km am Stück, Rest Intervalle"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Gleiche Vorgabe wie Di"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:5,ph:"Aufbau",fo:"Burpees einfuehren",dur:"30 min",kcal:"~260",ex:[
+    {name:"Burpees",badge:"Cardio",sets:["3 x 5 Wdh — langsam lernen","60 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["4 x 15 Wdh","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 35 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["3 x max Wdh","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["3 x 12 pro Bein","45 Sek Pause"]}
   ]},
-  {week:8,phase:"Aufbau",focus:"Mittlere Strecke komplett — Test Große Strecke",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, lockere Pace"},
-    {day:"Di",type:"lauf",strecke:"Mittlere (7,2 km)",note:"🎯 Komplett durchlaufen!"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"🎯 Erster Test große Strecke — Intervalle erlaubt!"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 2 Monate geschafft!"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:6,ph:"Aufbau",fo:"Seitliche Plank einfuehren",dur:"32 min",kcal:"~280",ex:[
+    {name:"Burpees",badge:"Cardio",sets:["3 x 8 Wdh","60 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["4 x 15 Wdh","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 40 Sekunden","45 Sek Pause"]},
+    {name:"Seitenplank",badge:"Core",sets:["2 x 20 Sek pro Seite","45 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["3 x max Wdh","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["3 x 12 pro Bein","45 Sek Pause"]}
   ]},
-  {week:9,phase:"Ausdauer",focus:"Große Strecke aufbauen — 3:1 Intervalle",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett — Pflicht ab jetzt"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"3 min laufen / 1 min gehen"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Gleiche Intervalle"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:7,ph:"Aufbau",fo:"Tempo erhoehen",dur:"33 min",kcal:"~300",ex:[
+    {name:"Burpees",badge:"Cardio",sets:["4 x 8 Wdh","60 Sek Pause"]},
+    {name:"Jump Squats",badge:"Cardio",sets:["3 x 10 Wdh — Kniebeugen mit Sprung","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 45 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["4 x max Wdh","60 Sek Pause"]},
+    {name:"Seitenplank",badge:"Core",sets:["2 x 25 Sek pro Seite","45 Sek Pause"]}
   ]},
-  {week:10,phase:"Ausdauer",focus:"Große Strecke — 5:1 Intervalle",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"5 min laufen / 1 min gehen"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, etwas schneller"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"6 km am Stück versuchen"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:8,ph:"Aufbau",fo:"Volle Runde ohne Pause",dur:"35 min",kcal:"~320",ex:[
+    {name:"Burpees",badge:"Cardio",sets:["4 x 10 Wdh","60 Sek Pause"]},
+    {name:"Jump Squats",badge:"Cardio",sets:["3 x 12 Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 50 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["4 x max Wdh","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["4 x 12 pro Bein","45 Sek Pause"]},
+    {name:"Mountain Climbers",badge:"Cardio",sets:["3 x 30 Sekunden","45 Sek Pause"]}
   ]},
-  {week:11,phase:"Ausdauer",focus:"Große Strecke — 7 km am Stück",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"7 km am Stück, Rest gehen"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Gleiche Vorgabe wie Di"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:9,ph:"Ausdauer",fo:"Circuits einfuehren",dur:"38 min",kcal:"~350",ex:[
+    {name:"Circuit (2x)",badge:"Cardio",sets:["Burpees x8 dann High Knees 30 Sek dann 30 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["4 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["4 x 50 Sekunden","45 Sek Pause"]},
+    {name:"Kniebeugen tief",badge:"Kraft",sets:["4 x 15 Wdh — so tief wie moeglich","45 Sek Pause"]},
+    {name:"Seitenplank",badge:"Core",sets:["3 x 30 Sek pro Seite","45 Sek Pause"]}
   ]},
-  {week:12,phase:"Ausdauer",focus:"Große Strecke komplett — erster Durchlauf!",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Lockere Pace — Energie sparen"},
-    {day:"Di",type:"gehen",strecke:"45 min",note:"Aktive Erholung — Beine schonen"},
-    {day:"Mi",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, kein Stress"},
-    {day:"Do",type:"gehen",strecke:"30 min",note:"Leichte Erholung"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"🏆 9,1 km komplett durchlaufen!"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 3 Monate!"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Feiern. Wirklich."}
+  {w:10,ph:"Ausdauer",fo:"Laengere Circuits",dur:"40 min",kcal:"~370",ex:[
+    {name:"Circuit (3x)",badge:"Cardio",sets:["Burpees x10 dann Mountain Climbers 30 Sek dann 30 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["4 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["4 x 55 Sekunden","45 Sek Pause"]},
+    {name:"Jump Squats",badge:"Cardio",sets:["4 x 12 Wdh","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["4 x 14 pro Bein","45 Sek Pause"]}
   ]},
-  {week:13,phase:"Konsolidierung",focus:"Alle 3 Strecken beherrschen",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, flottes Tempo"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett durchlaufen"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett — Pace etwas steigern"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:11,ph:"Ausdauer",fo:"60 Sek Plank Ziel",dur:"40 min",kcal:"~380",ex:[
+    {name:"Circuit (3x)",badge:"Cardio",sets:["Burpees x10 dann Jump Squats x10 dann 30 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["5 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 60 Sekunden — Ziel!","60 Sek Pause"]},
+    {name:"Seitenplank",badge:"Core",sets:["3 x 35 Sek pro Seite","45 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["4 x 14 pro Bein","45 Sek Pause"]}
   ]},
-  {week:14,phase:"Konsolidierung",focus:"Pace verbessern — Kleine Strecke schneller",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Ziel: unter 28 min"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett, lockere Pace"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:12,ph:"Ausdauer",fo:"Erholungswoche Indoor",dur:"25 min",kcal:"~220",ex:[
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 15 Wdh — locker","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 45 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["3 x 10 Wdh — kein Vollgas","60 Sek Pause"]},
+    {name:"Dehnen",badge:"Recovery",sets:["10 min — Huefte, Oberschenkel, Waden"]}
   ]},
-  {week:15,phase:"Konsolidierung",focus:"Woche der großen Strecken",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"3× große Strecke diese Woche 💪"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:13,ph:"Konsolidierung",fo:"HIIT Einstieg",dur:"42 min",kcal:"~400",ex:[
+    {name:"HIIT Block (3x)",badge:"Cardio",sets:["40 Sek Burpees dann 20 Sek Pause dann 40 Sek High Knees dann 20 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["5 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["4 x 60 Sekunden","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["4 x 15 pro Bein","45 Sek Pause"]}
   ]},
-  {week:16,phase:"Konsolidierung",focus:"Erholungswoche — Volumen reduzieren",lauftage:3,ruhetage:3,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, kein Druck"},
-    {day:"Di",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, lockere Pace"},
-    {day:"Do",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 4 Monate!"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:14,ph:"Konsolidierung",fo:"Staerker werden",dur:"43 min",kcal:"~410",ex:[
+    {name:"HIIT Block (3x)",badge:"Cardio",sets:["45 Sek Burpees dann 15 Sek Pause dann 45 Sek Mountain Climbers dann 15 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["5 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["4 x 65 Sekunden","60 Sek Pause"]},
+    {name:"Jump Squats",badge:"Cardio",sets:["4 x 15 Wdh","60 Sek Pause"]},
+    {name:"Seitenplank",badge:"Core",sets:["3 x 40 Sek pro Seite","45 Sek Pause"]}
   ]},
-  {week:17,phase:"Zielgerade",focus:"Pace steigern — alle Strecken flotter",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Ziel: unter 25 min"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett, bewusst auf Tempo achten"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Ziel: unter 45 min"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:15,ph:"Konsolidierung",fo:"Maximale Wiederholungen",dur:"45 min",kcal:"~430",ex:[
+    {name:"HIIT Block (4x)",badge:"Cardio",sets:["40 Sek Burpees dann 20 Sek Pause dann 40 Sek Jump Squats dann 20 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["5 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["4 x 70 Sekunden","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["5 x 15 pro Bein","45 Sek Pause"]}
   ]},
-  {week:18,phase:"Zielgerade",focus:"Konstanz — 4× große Strecke",lauftage:5,ruhetage:2,gehtage:0,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Mi",type:"pause",strecke:"Ruhetag",note:"Aktive Erholung oder Ruhe"},
-    {day:"Do",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Sa",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker auslaufen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"}
+  {w:16,ph:"Konsolidierung",fo:"Erholungswoche",dur:"25 min",kcal:"~200",ex:[
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 15 Wdh — locker","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 45 Sekunden","45 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["3 x 10 Wdh — locker","60 Sek Pause"]},
+    {name:"Dehnen",badge:"Recovery",sets:["10 min — Gesamtkoerper"]}
   ]},
-  {week:19,phase:"Zielgerade",focus:"Große Strecke unter 60 min",lauftage:4,ruhetage:2,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Komplett, flott"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"🎯 Ziel: unter 60 min"},
-    {day:"Mi",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Do",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett, Pace halten"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:17,ph:"Zielgerade",fo:"HIIT Intensitaet maximieren",dur:"45 min",kcal:"~450",ex:[
+    {name:"HIIT Block (4x)",badge:"Cardio",sets:["50 Sek Burpees dann 10 Sek Pause dann 50 Sek High Knees dann 10 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["5 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["5 x 70 Sekunden","60 Sek Pause"]},
+    {name:"Jump Squats",badge:"Cardio",sets:["4 x 18 Wdh","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["5 x 15 pro Bein","45 Sek Pause"]}
   ]},
-  {week:20,phase:"Zielgerade",focus:"Erholungswoche vor Endspurt",lauftage:3,ruhetage:3,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker"},
-    {day:"Di",type:"gehen",strecke:"45 min",note:"Aktive Erholung"},
-    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, ruhige Pace"},
-    {day:"Do",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen — 5 Monate!"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:18,ph:"Zielgerade",fo:"Kraft + Ausdauer kombinieren",dur:"47 min",kcal:"~460",ex:[
+    {name:"Mountain Climbers HIIT (4x)",badge:"Cardio",sets:["50 Sek Vollgas dann 10 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["6 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["5 x 75 Sekunden","60 Sek Pause"]},
+    {name:"Seitenplank",badge:"Core",sets:["4 x 45 Sek pro Seite","45 Sek Pause"]},
+    {name:"Burpees Tabata",badge:"Cardio",sets:["8 x 20 Sek Vollgas dann 10 Sek Pause"]}
   ]},
-  {week:21,phase:"Endspurt",focus:"Peak-Woche — maximales Volumen",lauftage:5,ruhetage:2,gehtage:0,days:[
-    {day:"Mo",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett"},
-    {day:"Di",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Mi",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"Do",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett"},
-    {day:"Sa",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Locker auslaufen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:19,ph:"Zielgerade",fo:"Peak Kraft",dur:"48 min",kcal:"~480",ex:[
+    {name:"Burpees Tabata",badge:"Cardio",sets:["8 x 20 Sek Vollgas dann 10 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["6 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["5 x 80 Sekunden","60 Sek Pause"]},
+    {name:"Jump Squats",badge:"Cardio",sets:["5 x 18 Wdh","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["5 x 18 pro Bein","45 Sek Pause"]}
   ]},
-  {week:22,phase:"Endspurt",focus:"Tapering — Körper frisch halten",lauftage:3,ruhetage:3,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, kein Stress"},
-    {day:"Di",type:"gehen",strecke:"30 min",note:"Leichte Bewegung"},
-    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, ruhige Pace"},
-    {day:"Do",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"Fr",type:"lauf",strecke:"Große (9,1 km)",note:"Komplett — letzter Lauf vor Finalwoche"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"⚖️ Wiegen"},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe"}
+  {w:20,ph:"Zielgerade",fo:"Erholungswoche",dur:"25 min",kcal:"~210",ex:[
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 15 Wdh — locker","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 60 Sekunden","60 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["3 x 12 Wdh — locker","60 Sek Pause"]},
+    {name:"Dehnen",badge:"Recovery",sets:["10 min — Gesamtkoerper"]}
   ]},
-  {week:23,phase:"Endspurt",focus:"Letzte Vorbereitung — Energie tanken",lauftage:3,ruhetage:3,gehtage:1,days:[
-    {day:"Mo",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker, Beine frisch halten"},
-    {day:"Di",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"Mi",type:"lauf",strecke:"Mittlere (7,2 km)",note:"Komplett, entspannt"},
-    {day:"Do",type:"gehen",strecke:"30 min",note:"Leichte Bewegung"},
-    {day:"Fr",type:"lauf",strecke:"Kleine (4,5 km)",note:"Letzter Lauf vor dem großen Tag"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Früh ins Bett. Gut essen."},
-    {day:"So",type:"pause",strecke:"Ruhetag",note:"Ruhe und mentale Vorbereitung"}
+  {w:21,ph:"Endspurt",fo:"Maximale Intensitaet",dur:"50 min",kcal:"~500",ex:[
+    {name:"Burpees Tabata",badge:"Cardio",sets:["8 x 20 Sek Vollgas dann 10 Sek Pause"]},
+    {name:"HIIT Block (5x)",badge:"Cardio",sets:["45 Sek Jump Squats dann 15 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["6 x max Wdh","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["5 x 90 Sekunden!","60 Sek Pause"]},
+    {name:"Ausfallschritte",badge:"Kraft",sets:["5 x 20 pro Bein","45 Sek Pause"]}
   ]},
-  {week:24,phase:"Ziel erreicht",focus:"🏆 Finaler Run — Gewichtsziel erreicht",lauftage:2,ruhetage:4,gehtage:1,days:[
-    {day:"Mo",type:"pause",strecke:"Ruhetag",note:"Ausruhen, viel trinken, gut essen"},
-    {day:"Di",type:"lauf",strecke:"Kleine (4,5 km)",note:"Locker einlaufen — kein Stress"},
-    {day:"Mi",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"Do",type:"gehen",strecke:"30 min",note:"Letzte lockere Bewegung"},
-    {day:"Fr",type:"pause",strecke:"Ruhetag",note:"Energie tanken"},
-    {day:"Sa",type:"pause",strecke:"Ruhetag",note:"Ruhe"},
-    {day:"So",type:"lauf",strecke:"Große (9,1 km)",note:"🏆 FINALER RUN — alles geben! Du hast 24 Wochen dafür trainiert."}
+  {w:22,ph:"Endspurt",fo:"Tapering Indoor",dur:"30 min",kcal:"~280",ex:[
+    {name:"Jumping Jacks",badge:"Cardio",sets:["3 x 60 Sekunden","45 Sek Pause"]},
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 15 Wdh","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 60 Sekunden","60 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["3 x 12 Wdh","60 Sek Pause"]}
+  ]},
+  {w:23,ph:"Endspurt",fo:"Letzte Vorbereitung — leicht halten",dur:"25 min",kcal:"~220",ex:[
+    {name:"Kniebeugen",badge:"Kraft",sets:["3 x 12 Wdh — locker","45 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["3 x 45 Sekunden","60 Sek Pause"]},
+    {name:"Liegestuetz",badge:"Kraft",sets:["2 x 10 Wdh — locker","60 Sek Pause"]},
+    {name:"Dehnen",badge:"Recovery",sets:["10 min — alles lockern"]}
+  ]},
+  {w:24,ph:"Ziel erreicht",fo:"Finale Woche — leicht bewegen",dur:"20 min",kcal:"~150",ex:[
+    {name:"Kniebeugen",badge:"Kraft",sets:["2 x 10 Wdh — sehr locker","60 Sek Pause"]},
+    {name:"Plank",badge:"Core",sets:["2 x 30 Sekunden","60 Sek Pause"]},
+    {name:"Dehnen",badge:"Recovery",sets:["10 min — Gesamtkoerper fuer den grossen Tag"]}
   ]}
 ];
-
-// ── State ──────────────────────────────────────────────
-let activeWeek = 0;
-
+ 
+// ── STATE ─────────────────────────────────────────
 function loadState() {
   try {
     return {
-      completedWeeks: JSON.parse(localStorage.getItem('tp_weeks') || '[]'),
-      completedDays:  JSON.parse(localStorage.getItem('tp_days')  || '{}')
+      cw: JSON.parse(localStorage.getItem('tp_cw') || '[]'),
+      cd: JSON.parse(localStorage.getItem('tp_cd') || '{}'),
+      iw: JSON.parse(localStorage.getItem('tp_iw') || '[]'),
+      is: JSON.parse(localStorage.getItem('tp_is') || '{}'),
+      wt: JSON.parse(localStorage.getItem('tp_wt') || '[]')
     };
-  } catch(e) { return { completedWeeks: [], completedDays: {} }; }
+  } catch(e) {
+    return {cw:[],cd:{},iw:[],is:{},wt:[]};
+  }
 }
-function saveState() {
-  localStorage.setItem('tp_weeks', JSON.stringify(state.completedWeeks));
-  localStorage.setItem('tp_days',  JSON.stringify(state.completedDays));
+function save() {
+  localStorage.setItem('tp_cw', JSON.stringify(ST.cw));
+  localStorage.setItem('tp_cd', JSON.stringify(ST.cd));
+  localStorage.setItem('tp_iw', JSON.stringify(ST.iw));
+  localStorage.setItem('tp_is', JSON.stringify(ST.is));
+  localStorage.setItem('tp_wt', JSON.stringify(ST.wt));
 }
-let state = loadState();
-
-// day key: "w{weekIdx}_d{dayIdx}"
-function dayKey(w, d) { return `w${w}_d${d}`; }
-
+var ST = loadState();
+var aW = 0;
+var aI = 0;
+ 
+// ── HELPERS ───────────────────────────────────────
+function rgba(hex, a) {
+  var r = parseInt(hex.slice(1,3),16);
+  var g = parseInt(hex.slice(3,5),16);
+  var b = parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+function dk(w,d) { return 'w'+w+'d'+d; }
+function sk(w,e,s) { return 'i'+w+'e'+e+'s'+s; }
+ 
+// ── NAV ───────────────────────────────────────────
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('page-'+p).classList.add('active');
+  var idx = {lauf:0,indoor:1,weight:2}[p];
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  if (p === 'weight') renderWeight();
+}
+function goIndoor() {
+  aI = aW;
+  showPage('indoor');
+  renderInd();
+}
+ 
+// ── LAUF RENDER ───────────────────────────────────
 function toggleWeek() {
-  const i = state.completedWeeks.indexOf(activeWeek);
-  if (i === -1) state.completedWeeks.push(activeWeek);
-  else state.completedWeeks.splice(i, 1);
-  saveState(); render();
+  var i = ST.cw.indexOf(aW);
+  if (i === -1) ST.cw.push(aW); else ST.cw.splice(i,1);
+  save(); renderLauf();
 }
-function toggleDay(weekIdx, dayIdx) {
-  const k = dayKey(weekIdx, dayIdx);
-  if (state.completedDays[k]) delete state.completedDays[k];
-  else state.completedDays[k] = true;
-  saveState(); buildDays();
-  // auto-check week if all days done
-  const w = allWeeks[weekIdx];
-  const allDone = w.days.every((_,i) => state.completedDays[dayKey(weekIdx,i)]);
-  const wDone = state.completedWeeks.includes(weekIdx);
-  if (allDone && !wDone) { state.completedWeeks.push(weekIdx); saveState(); buildWeekGrid(); buildWeekCard(); updateProgress(); }
-  else if (!allDone && wDone) { state.completedWeeks.splice(state.completedWeeks.indexOf(weekIdx),1); saveState(); buildWeekGrid(); buildWeekCard(); updateProgress(); }
+function toggleDay(wi, di) {
+  var k = dk(wi,di);
+  if (ST.cd[k]) delete ST.cd[k]; else ST.cd[k] = true;
+  save(); buildDays();
+  var w = LW[wi];
+  var allDone = w.days.every(function(_,i){ return ST.cd[dk(wi,i)]; });
+  var wDone = ST.cw.indexOf(wi) !== -1;
+  if (allDone && !wDone) { ST.cw.push(wi); save(); buildWGrid(); buildWCard(); updateLP(); }
+  else if (!allDone && wDone) { ST.cw.splice(ST.cw.indexOf(wi),1); save(); buildWGrid(); buildWCard(); updateLP(); }
 }
-function resetAll() {
-  if (!confirm('Alle Fortschritte zurücksetzen?')) return;
-  state = { completedWeeks: [], completedDays: {} };
-  saveState(); render();
-}
-
-// ── Helpers ────────────────────────────────────────────
-function hex2rgba(hex, a) {
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${a})`;
-}
-
-// ── Render ─────────────────────────────────────────────
-function buildPhaseLegend() {
-  document.getElementById('phaseLegend').innerHTML = phases.map(p => {
-    const c = phaseColors[p];
-    return `<div class="phase-pill" style="background:${hex2rgba(c,.07)};border-color:${hex2rgba(c,.25)}">
-      <div class="phase-dot" style="background:${c}"></div>
-      <span style="color:${c}">${p}</span></div>`;
+function laufNav(d) { var n=aW+d; if(n>=0&&n<24){aW=n;renderLauf();} }
+function resetLauf() { if(!confirm('Laufplan zuruecksetzen?'))return; ST.cw=[]; ST.cd={}; save(); renderLauf(); }
+ 
+function buildLegend(id) {
+  document.getElementById(id).innerHTML = PHASES.map(function(p){
+    var c=PC[p];
+    return '<div class="phase-pill" style="background:'+rgba(c,.07)+';border-color:'+rgba(c,.25)+'"><div class="phase-dot" style="background:'+c+'"></div><span style="color:'+c+'">'+p+'</span></div>';
   }).join('');
 }
-
-function buildWeekGrid() {
-  document.getElementById('weekGrid').innerHTML = allWeeks.map((w, i) => {
-    const isActive = i === activeWeek;
-    const isDone   = state.completedWeeks.includes(i);
-    const c        = phaseColors[w.phase];
-    const isWeigh  = weighInWeeks.includes(w.week);
-    const border   = isActive ? c : isDone ? hex2rgba(c,.4) : 'rgba(255,255,255,0.07)';
-    const bg       = isActive ? hex2rgba(c,.12) : isDone ? hex2rgba(c,.06) : 'rgba(255,255,255,0.02)';
-    const color    = isActive ? c : isDone ? hex2rgba(c,.7) : '#475569';
-    const fw       = isActive ? 700 : 400;
-    const label    = isDone ? '✓' : `W${w.week}`;
-    const dot      = (isWeigh && !isDone) ? `<div class="weigh-dot"></div>` : '';
-    return `<button class="week-btn" onclick="setWeek(${i})"
-      style="border-color:${border};background:${bg};color:${color};font-weight:${fw}">${label}${dot}</button>`;
+function buildWGrid() {
+  document.getElementById('weekGrid').innerHTML = LW.map(function(w,i){
+    var isA=i===aW, isDone=ST.cw.indexOf(i)!==-1, c=PC[w.ph], isWi=WEIGH_WEEKS.indexOf(w.w)!==-1;
+    var border=isA?c:isDone?rgba(c,.4):'rgba(255,255,255,0.07)';
+    var bg=isA?rgba(c,.12):isDone?rgba(c,.06):'rgba(255,255,255,0.02)';
+    var col=isA?c:isDone?rgba(c,.7):'#475569';
+    var lbl=isDone?'✓':'W'+w.w;
+    var dot=(isWi&&!isDone)?'<div class="weigh-dot"></div>':'';
+    return '<button class="week-btn" onclick="laufNav('+(i-aW)+')" style="border-color:'+border+';background:'+bg+';color:'+col+';font-weight:'+(isA?700:400)+'">'+lbl+dot+'</button>';
   }).join('');
 }
-
-function buildWeekCard() {
-  const w    = allWeeks[activeWeek];
-  const c    = phaseColors[w.phase];
-  const isDone = state.completedWeeks.includes(activeWeek);
-  const isWeigh = weighInWeeks.includes(w.week);
-  document.getElementById('weekCard').style.cssText = `background:${hex2rgba(c,.07)};border-color:${hex2rgba(c,.2)}`;
-  document.getElementById('cardPhase').textContent  = w.phase;
-  document.getElementById('cardPhase').style.color  = c;
-  document.getElementById('cardTitle').textContent  = `Woche ${w.week}`;
-  document.getElementById('cardFocus').textContent  = w.focus;
-  const btn = document.getElementById('checkBtn');
-  btn.textContent        = isDone ? '✓ Erledigt' : 'Abhaken';
-  btn.style.borderColor  = isDone ? c : 'rgba(255,255,255,0.12)';
-  btn.style.background   = isDone ? hex2rgba(c,.15) : 'transparent';
-  btn.style.color        = isDone ? c : '#64748b';
-  document.getElementById('cardStats').innerHTML =
-    `<span class="week-stat" style="color:#4ade80">🏃 ${w.lauftage}× Laufen</span>
-     <span class="week-stat" style="color:#94a3b8">🚶 ${w.gehtage}× Gehen</span>
-     <span class="week-stat" style="color:#475569">😴 ${w.ruhetage}× Pause</span>
-     ${isWeigh ? '<span class="week-stat" style="color:#fbbf24">⚖️ Wiegetag</span>' : ''}`;
+function buildWCard() {
+  var w=LW[aW], c=PC[w.ph], isDone=ST.cw.indexOf(aW)!==-1, isWi=WEIGH_WEEKS.indexOf(w.w)!==-1;
+  var card=document.getElementById('weekCard');
+  card.style.background=rgba(c,.07); card.style.borderColor=rgba(c,.2);
+  document.getElementById('cardPhase').textContent=w.ph;
+  document.getElementById('cardPhase').style.color=c;
+  document.getElementById('cardTitle').textContent='Woche '+w.w;
+  document.getElementById('cardFocus').textContent=w.fo;
+  var btn=document.getElementById('checkBtn');
+  btn.textContent=isDone?'Erledigt':'Abhaken';
+  btn.style.borderColor=isDone?c:'rgba(255,255,255,0.12)';
+  btn.style.background=isDone?rgba(c,.15):'transparent';
+  btn.style.color=isDone?c:'#64748b';
+  var stats='<span class="week-stat" style="color:#4ade80">🏃 '+w.lt+'x Laufen</span>';
+  if(w.ft) stats+='<span class="week-stat" style="color:#fbbf24">🚴 '+w.ft+'x Fahrrad</span>';
+  if(w.gt) stats+='<span class="week-stat" style="color:#94a3b8">🚶 '+w.gt+'x Gehen</span>';
+  stats+='<span class="week-stat" style="color:#475569">😴 '+w.rt+'x Pause</span>';
+  if(isWi) stats+='<span class="week-stat" style="color:#fbbf24">⚖️ Wiegetag</span>';
+  document.getElementById('cardStats').innerHTML=stats;
 }
-
 function buildDays() {
-  const w = allWeeks[activeWeek];
-  const c = phaseColors[w.phase];
-  const labelColor = { lauf: c, gehen: '#94a3b8', pause: '#334155' };
-  document.getElementById('daysList').innerHTML = w.days.map((d, i) => {
-    const k     = dayKey(activeWeek, i);
-    const done  = !!state.completedDays[k];
-    const bgCls = d.type + '-bg';
-    return `<div class="day-row ${bgCls}${done?' done':''}" onclick="toggleDay(${activeWeek},${i})">
-      <div class="day-label" style="color:${labelColor[d.type]}">${d.day}</div>
-      <div class="day-dot dot-${d.type}"></div>
-      <div style="flex:1;padding-right:20px">
-        <div class="day-strecke">${d.strecke}</div>
-        <div class="day-note">${d.note}</div>
-      </div>
-      <div class="day-check" style="color:${c}">✓</div>
-    </div>`;
+  var w=LW[aW], c=PC[w.ph];
+  var lc={lauf:c,gehen:'#94a3b8',pause:'#334155',fahrrad:'#fbbf24'};
+  document.getElementById('daysList').innerHTML=w.days.map(function(d,i){
+    var k=dk(aW,i), done=!!ST.cd[k];
+    return '<div class="day-row '+d.t+'-bg'+(done?' done':'')+'" onclick="toggleDay('+aW+','+i+')">'
+      +'<div class="day-label" style="color:'+lc[d.t]+'">'+d.d+'</div>'
+      +'<div class="day-dot dot-'+d.t+'"></div>'
+      +'<div style="flex:1;padding-right:20px"><div class="day-strecke">'+d.s+'</div><div class="day-note">'+d.n+'</div></div>'
+      +'<div class="day-check" style="color:'+c+'">✓</div>'
+      +'</div>';
   }).join('');
 }
-
-function buildNav() {
-  const c    = phaseColors[allWeeks[activeWeek].phase];
-  const prev = document.getElementById('btnPrev');
-  const next = document.getElementById('btnNext');
-  prev.disabled    = activeWeek === 0;
-  prev.style.color = activeWeek === 0 ? '#2d3748' : '#94a3b8';
-  next.disabled    = activeWeek === 23;
-  next.style.borderColor = activeWeek < 23 ? hex2rgba(c,.35) : 'rgba(255,255,255,0.07)';
-  next.style.background  = activeWeek < 23 ? hex2rgba(c,.10) : 'rgba(255,255,255,0.02)';
-  next.style.color       = activeWeek < 23 ? c : '#475569';
+function buildLNav() {
+  var c=PC[LW[aW].ph];
+  var p=document.getElementById('btnPrev'), n=document.getElementById('btnNext');
+  p.disabled=aW===0; p.style.color=aW===0?'#2d3748':'#94a3b8';
+  n.disabled=aW===23;
+  n.style.borderColor=aW<23?rgba(c,.35):'rgba(255,255,255,0.07)';
+  n.style.background=aW<23?rgba(c,.10):'rgba(255,255,255,0.02)';
+  n.style.color=aW<23?c:'#475569';
 }
-
-function updateProgress() {
-  const n   = state.completedWeeks.length;
-  const pct = Math.round(n / 24 * 100);
-  document.getElementById('progressText').textContent = `${n}/24 Wochen · ${pct}%`;
-  document.getElementById('progressBar').style.width  = pct + '%';
+function updateLP() {
+  var n=ST.cw.length, pct=Math.round(n/24*100);
+  document.getElementById('laufPText').textContent=n+'/24 Wochen · '+pct+'%';
+  document.getElementById('laufPBar').style.width=pct+'%';
 }
-
-function render() {
-  buildWeekGrid(); buildWeekCard(); buildDays(); buildNav(); updateProgress();
+function renderLauf() { buildWGrid(); buildWCard(); buildDays(); buildLNav(); updateLP(); }
+ 
+// ── INDOOR RENDER ─────────────────────────────────
+var BC = {Cardio:'#f87171',Kraft:'#60a5fa',Core:'#a78bfa',Recovery:'#4ade80'};
+ 
+function toggleIndWeek() {
+  var i=ST.iw.indexOf(aI);
+  if(i===-1) ST.iw.push(aI); else ST.iw.splice(i,1);
+  save(); renderInd();
 }
-
-function setWeek(i)    { activeWeek = i; render(); }
-function navigate(dir) { const n = activeWeek + dir; if (n >= 0 && n < 24) { activeWeek = n; render(); } }
-
-// Init
-buildPhaseLegend();
-render();
+function toggleSet(wi,ei,si) {
+  var k=sk(wi,ei,si);
+  if(ST.is[k]) delete ST.is[k]; else ST.is[k]=true;
+  save(); buildExercises();
+  var w=IW[wi];
+  var allDone=w.ex.every(function(ex,e){ return ex.sets.every(function(_,s){ return ST.is[sk(wi,e,s)]; }); });
+  var wDone=ST.iw.indexOf(wi)!==-1;
+  if(allDone&&!wDone){ST.iw.push(wi);save();buildIGrid();buildICard();updateIP();}
+  else if(!allDone&&wDone){ST.iw.splice(ST.iw.indexOf(wi),1);save();buildIGrid();buildICard();updateIP();}
+}
+function indNav(d) { var n=aI+d; if(n>=0&&n<24){aI=n;renderInd();} }
+function resetInd() { if(!confirm('Indoor Plan zuruecksetzen?'))return; ST.iw=[]; ST.is={}; save(); renderInd(); }
+ 
+function buildIGrid() {
+  document.getElementById('indWeekGrid').innerHTML=IW.map(function(w,i){
+    var isA=i===aI, isDone=ST.iw.indexOf(i)!==-1, c=PC[w.ph];
+    var border=isA?c:isDone?rgba(c,.4):'rgba(255,255,255,0.07)';
+    var bg=isA?rgba(c,.12):isDone?rgba(c,.06):'rgba(255,255,255,0.02)';
+    var col=isA?c:isDone?rgba(c,.7):'#475569';
+    var lbl=isDone?'✓':'W'+w.w;
+    return '<button class="week-btn" onclick="indNav('+(i-aI)+')" style="border-color:'+border+';background:'+bg+';color:'+col+';font-weight:'+(isA?700:400)+'">'+lbl+'</button>';
+  }).join('');
+}
+function buildICard() {
+  var w=IW[aI], c=PC[w.ph], isDone=ST.iw.indexOf(aI)!==-1;
+  var card=document.getElementById('indWeekCard');
+  card.style.background=rgba(c,.07); card.style.borderColor=rgba(c,.2);
+  document.getElementById('indCardPhase').textContent=w.ph;
+  document.getElementById('indCardPhase').style.color=c;
+  document.getElementById('indCardTitle').textContent='Woche '+w.w+' — '+w.fo;
+  document.getElementById('indCardFocus').textContent='Dauer: '+w.dur+' · '+w.kcal+' kcal';
+  var btn=document.getElementById('indCheckBtn');
+  btn.textContent=isDone?'Erledigt':'Abhaken';
+  btn.style.borderColor=isDone?c:'rgba(255,255,255,0.12)';
+  btn.style.background=isDone?rgba(c,.15):'transparent';
+  btn.style.color=isDone?c:'#64748b';
+  document.getElementById('indCardStats').innerHTML='<span class="week-stat" style="color:#a78bfa">💪 '+w.ex.length+' Uebungen</span>';
+}
+function buildExercises() {
+  var w=IW[aI];
+  document.getElementById('indExercises').innerHTML=w.ex.map(function(ex,ei){
+    var bc=BC[ex.badge]||'#94a3b8';
+    var sets=ex.sets.map(function(s,si){
+      var k=sk(aI,ei,si), done=!!ST.is[k];
+      return '<div class="set-row'+(done?' done':'')+'" onclick="toggleSet('+aI+','+ei+','+si+')">'
+        +'<span class="set-num">'+(si+1)+'.</span>'
+        +'<span class="set-label">'+s+'</span>'
+        +'<span class="set-check">✓</span>'
+        +'</div>';
+    }).join('');
+    return '<div class="exercise-card">'
+      +'<div class="exercise-header"><div class="exercise-name">'+ex.name+'</div>'
+      +'<div class="exercise-badge" style="background:'+rgba(bc,.15)+';color:'+bc+'">'+ex.badge+'</div></div>'
+      +'<div class="exercise-sets">'+sets+'</div>'
+      +'</div>';
+  }).join('');
+}
+function buildINav() {
+  var c=PC[IW[aI].ph];
+  var p=document.getElementById('indBtnPrev'), n=document.getElementById('indBtnNext');
+  p.disabled=aI===0; p.style.color=aI===0?'#2d3748':'#94a3b8';
+  n.disabled=aI===23;
+  n.style.borderColor=aI<23?rgba(c,.35):'rgba(255,255,255,0.07)';
+  n.style.background=aI<23?rgba(c,.10):'rgba(255,255,255,0.02)';
+  n.style.color=aI<23?c:'#475569';
+}
+function updateIP() {
+  var n=ST.iw.length, pct=Math.round(n/24*100);
+  document.getElementById('indPText').textContent=n+'/24 Wochen · '+pct+'%';
+  document.getElementById('indPBar').style.width=pct+'%';
+}
+function renderInd() { buildIGrid(); buildICard(); buildExercises(); buildINav(); updateIP(); }
+ 
+// ── WEIGHT ────────────────────────────────────────
+var SW=105, GM=85, GX=90;
+ 
+function saveWeight() {
+  var inp=document.getElementById('wInput');
+  var val=parseFloat(inp.value);
+  if(isNaN(val)||val<40||val>250){alert('Bitte ein gueltiges Gewicht eingeben.');return;}
+  var now=new Date();
+  var date=now.getDate().toString().padStart(2,'0')+'.'+(now.getMonth()+1).toString().padStart(2,'0')+'.'+now.getFullYear();
+  ST.wt.unshift({kg:val,date:date,ts:Date.now()});
+  save(); inp.value=''; renderWeight();
+}
+function deleteWeight(i) {
+  if(!confirm('Eintrag loeschen?'))return;
+  ST.wt.splice(i,1); save(); renderWeight();
+}
+function resetWeight() { if(!confirm('Alle Gewichtsdaten loeschen?'))return; ST.wt=[]; save(); renderWeight(); }
+ 
+function renderWeight() {
+  var entries=ST.wt;
+  var cur=entries.length?entries[0].kg:SW;
+  var lost=Math.max(0,SW-cur).toFixed(1);
+  var toGoal=Math.max(0,cur-GX).toFixed(1);
+  var pct=Math.min(100,Math.max(0,Math.round((SW-cur)/(SW-GX)*100)));
+ 
+  document.getElementById('wStats').innerHTML=
+    '<div class="weight-stat-card"><div class="weight-stat-label">Aktuell</div><div class="weight-stat-val" style="color:#4ade80">'+cur+' kg</div><div class="weight-stat-sub">'+entries.length+' Eintraege</div></div>'+
+    '<div class="weight-stat-card"><div class="weight-stat-label">Abgenommen</div><div class="weight-stat-val" style="color:#60a5fa">-'+lost+' kg</div><div class="weight-stat-sub">seit Start</div></div>'+
+    '<div class="weight-stat-card"><div class="weight-stat-label">Bis Ziel</div><div class="weight-stat-val" style="color:#f59e0b">'+toGoal+' kg</div><div class="weight-stat-sub">Ziel: '+GX+' kg</div></div>';
+ 
+  document.getElementById('wGoalBar').innerHTML=
+    '<div class="goal-bar-header"><span>Zielfortschritt</span><span>'+pct+'%</span></div>'+
+    '<div class="goal-track"><div class="goal-fill" style="width:'+pct+'%"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--dim)"><span>105 kg</span><span>Ziel: '+GX+' kg</span></div>';
+ 
+  if(!entries.length) {
+    document.getElementById('wEntries').innerHTML='<div class="empty-state">Noch kein Eintrag.<br>Trag jeden Mittwoch dein Gewicht ein.</div>';
+  } else {
+    document.getElementById('wEntries').innerHTML=entries.map(function(e,i){
+      var prev=entries[i+1];
+      var diff=prev?e.kg-prev.kg:e.kg-SW;
+      var ds=diff>0?'+'+diff.toFixed(1):diff.toFixed(1);
+      var dc=diff<=0?'#4ade80':'#f87171';
+      return '<div class="weight-entry">'
+        +'<div><div class="weight-entry-date">'+e.date+'</div><div class="weight-entry-val">'+e.kg+' kg</div></div>'
+        +'<div style="display:flex;align-items:center;gap:12px">'
+        +'<div class="weight-entry-diff" style="color:'+dc+'">'+ds+' kg</div>'
+        +'<button class="weight-del" onclick="deleteWeight('+i+')">✕</button>'
+        +'</div></div>';
+    }).join('');
+  }
+ 
+  if(entries.length >= 2) {
+    document.getElementById('wChartWrap').style.display='block';
+    drawChart();
+  } else {
+    document.getElementById('wChartWrap').style.display='none';
+  }
+}
+ 
+function drawChart() {
+  var canvas=document.getElementById('wChart');
+  var ctx=canvas.getContext('2d');
+  var entries=[].concat(ST.wt).reverse();
+  var dpr=window.devicePixelRatio||1;
+  var W=canvas.parentElement.clientWidth-32;
+  var H=180;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  var vals=entries.map(function(e){return e.kg;});
+  var minV=Math.min.apply(null,vals.concat([GM]))-2;
+  var maxV=Math.max.apply(null,vals.concat([SW]))+2;
+  var pad={l:30,r:10,t:10,b:25};
+  var cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  function xp(i){return pad.l+i/(entries.length-1)*cw;}
+  function yp(v){return pad.t+ch-(v-minV)/(maxV-minV)*ch;}
+  var yG1=yp(GX), yG2=yp(GM);
+  ctx.fillStyle='rgba(74,222,128,0.08)';
+  ctx.fillRect(pad.l,yG1,cw,yG2-yG1);
+  ctx.strokeStyle='rgba(74,222,128,0.3)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(pad.l,yG1); ctx.lineTo(pad.l+cw,yG1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.l,yG2); ctx.lineTo(pad.l+cw,yG2); ctx.stroke();
+  ctx.setLineDash([]);
+  var grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(96,165,250,0.9)');
+  grad.addColorStop(1,'rgba(74,222,128,0.9)');
+  ctx.strokeStyle=grad; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  ctx.beginPath();
+  entries.forEach(function(e,i){ if(i===0) ctx.moveTo(xp(i),yp(e.kg)); else ctx.lineTo(xp(i),yp(e.kg)); });
+  ctx.stroke();
+  entries.forEach(function(e,i){
+    var x=xp(i), y=yp(e.kg);
+    ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle='#60a5fa'; ctx.fill();
+    if(i===0||i===entries.length-1||entries.length<=8){
+      ctx.fillStyle='#94a3b8'; ctx.font='10px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(e.kg+'kg',x,y-8);
+    }
+  });
+  ctx.fillStyle='#475569'; ctx.font='9px DM Sans,sans-serif'; ctx.textAlign='center';
+  entries.forEach(function(e,i){
+    if(i===0||i===entries.length-1||entries.length<=6){
+      ctx.fillText(e.date.slice(0,5),xp(i),H-5);
+    }
+  });
+}
+ 
+// ── INIT ─────────────────────────────────────────
+buildLegend('phaseLegend');
+buildLegend('indPhaseLegend');
+renderLauf();
+renderInd();
+renderWeight();
 </script>
 </body>
 </html>
+ 
